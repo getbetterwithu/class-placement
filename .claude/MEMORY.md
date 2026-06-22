@@ -1,0 +1,1 @@
+- [배포 자산은 프로젝트 폴더에](deploy-asset-belongs-in-project.md) — 샘플·이미지 등 배포물이 의존하는 산출물은 99_outputs 아닌 프로젝트 폴더가 정본
