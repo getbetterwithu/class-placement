@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>분반 배치 시스템 · 사용설명서</title>
+<style>
+  :root {
+    --green: #059669; --blue: #2563eb; --purple: #7c3aed;
+    --amber: #d97706; --red: #dc2626; --ink: #1f2937; --muted: #6b7280;
+    --line: #e5e7eb; --bg: #f6f7fb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    color: var(--ink); background: var(--bg); line-height: 1.7;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px 80px; }
+  header.hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff; padding: 48px 20px 40px; text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  }
+  header.hero h1 { margin: 0 0 8px; font-size: 30px; font-weight: 800; }
+  header.hero p { margin: 0; font-size: 15px; opacity: 0.92; }
+  .launch {
+    display: inline-block; margin-top: 20px; padding: 12px 28px;
+    background: #fff; color: #764ba2; border-radius: 999px;
+    font-weight: 800; text-decoration: none; font-size: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform .15s;
+  }
+  .launch:hover { transform: translateY(-2px); }
+  section {
+    background: #fff; border: 1px solid var(--line); border-radius: 14px;
+    padding: 24px 26px; margin-top: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  h2 { font-size: 21px; margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
+  h2 .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 50%; background: var(--purple);
+    color: #fff; font-size: 15px; font-weight: 800; flex: 0 0 auto;
+  }
+  h3 { font-size: 16px; margin: 20px 0 8px; color: #374151; }
+  p, li { font-size: 15px; }
+  code {
+    background: #f3f4f6; padding: 2px 7px; border-radius: 5px;
+    font-size: 13.5px; color: #be185d; font-family: "SF Mono", Menlo, monospace;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 9px 12px; text-align: left; }
+  th { background: #f9fafb; font-weight: 700; }
+  .tip {
+    background: #ecfdf5; border-left: 4px solid var(--green);
+    padding: 12px 16px; border-radius: 8px; margin: 14px 0; font-size: 14px;
+  }
+  .warn {
+    background: #fff7ed; border-left: 4px solid var(--amber);
+    padding: 12px 16px; border-radius: 8px; margin: 14px 0; font-size: 14px;
+  }
+  .danger {
+    background: #fef2f2; border-left: 4px solid var(--red);
+    padding: 12px 16px; border-radius: 8px; margin: 14px 0; font-size: 14px;
+  }
+  .samples { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
+  .sample-card {
+    flex: 1 1 260px; border: 1px solid var(--line); border-radius: 12px;
+    padding: 18px; background: #fafafa;
+  }
+  .sample-card .name { font-weight: 800; margin-bottom: 4px; }
+  .sample-card .desc { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+  .dl {
+    display: inline-block; padding: 9px 18px; border-radius: 8px;
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    color: #fff; text-decoration: none; font-weight: 700; font-size: 14px;
+  }
+  .steps { counter-reset: s; list-style: none; padding: 0; margin: 0; }
+  .steps li {
+    position: relative; padding: 4px 0 14px 40px; margin: 0;
+  }
+  .steps li::before {
+    counter-increment: s; content: counter(s);
+    position: absolute; left: 0; top: 2px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--blue); color: #fff; font-weight: 800; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 36px; }
+  .badge { display:inline-block; background:#eef2ff; color:#4338ca; font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; margin-left:6px;}
+</style>
+</head>
+<body>
+<header class="hero">
+  <h1>🎓 분반 배치 시스템 · 사용설명서</h1>
+  <p>💣 폭탄돌리기 방지 · 데이터 기반 학급 편성 도구</p>
+  <a class="launch" href="index.html">▶ 프로그램 실행하기</a>
+</header>
+
+<div class="wrap">
+
+  <section>
+    <h2><span class="num">?</span> 이 프로그램은 무엇인가요?</h2>
+    <p>새 학년 분반(반 편성)을 <strong>성적 균형 + 분리 대상 + 직접 조정</strong>까지 한 화면에서 처리하는 도구입니다.
+       엑셀(또는 CSV) 한 장을 올리면, 성적을 고르게 나눈 <strong>ㄹ자(지그재그) 배치</strong>를 자동으로 만들어 줍니다.</p>
+    <div class="tip">
+      🔒 <strong>개인정보 안심</strong> — 모든 처리는 <strong>여러분의 브라우저 안에서만</strong> 일어납니다.
+      서버로 전송되지 않으며, 작업 이력도 남지 않습니다. (자세한 내용은 아래 7번)
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">1</span> 시작하기</h2>
+    <ol class="steps">
+      <li><strong>학년 선택</strong> — 첫 화면에서 <code>1학년 → 2학년</code> 또는 <code>2학년 → 3학년</code>을 고릅니다.
+          (현재 학년이 아니라 “어느 학년을 분반하는가”를 기준으로 고르면 됩니다.)</li>
+      <li><strong>학생 데이터 업로드</strong> — 초록색 <code>학생 데이터 업로드</code> 버튼을 누르거나,
+          그 영역에 파일을 <strong>끌어다 놓으면(드래그 앤 드롭)</strong> 됩니다.</li>
+      <li><strong>ㄹ자 배치 실행</strong> — 상단 <code>🎯 ㄹ자 배치 실행</code>을 누르면 자동 배치가 완성됩니다.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2><span class="num">2</span> 학생 데이터 형식</h2>
+    <p>엑셀 첫 줄에 아래 <strong>열 이름(헤더)</strong>이 있어야 합니다. 열 순서는 상관없습니다.</p>
+    <table>
+      <tr><th>열 이름</th><th>필수</th><th>설명</th><th>예시</th></tr>
+      <tr><td><code>구반</code></td><td>✅</td><td>이전 학년의 반</td><td>1</td></tr>
+      <tr><td><code>구번호</code></td><td>✅</td><td>이전 학년의 번호</td><td>4</td></tr>
+      <tr><td><code>성명</code></td><td>✅</td><td>학생 이름</td><td>일영사</td></tr>
+      <tr><td><code>기준성적</code></td><td>✅</td><td>배치 기준이 되는 점수</td><td>1077.6</td></tr>
+      <tr><td><code>성별</code></td><td>선택</td><td>남/여 (있으면 화면에 표시)</td><td>남</td></tr>
+      <tr><td><code>생년월일</code></td><td>선택</td><td>비워 두어도 됨</td><td>(공란)</td></tr>
+    </table>
+    <div class="tip">
+      💡 <strong>반 개수는 자동 감지</strong>됩니다. <code>구반</code> 값의 최댓값을 보고 8반이든 10반이든 학교에 맞게 처리합니다.
+      <strong>남녀공학</strong>이면 <code>성별</code>에 남·여를 섞어 두면 각 반의 성비가 함께 표시됩니다.
+    </div>
+    <div class="warn">
+      ⚠️ <code>구반</code>·<code>구번호</code>는 <strong>이전 학년(배치 전) 정보</strong>를 넣습니다.
+      배치 결과로 정해질 새 학번이 아니라, 지금까지 쓰던 반·번호입니다.
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">3</span> ㄹ자(지그재그) 배치란?</h2>
+    <p>전교생을 <strong>기준성적 순으로 줄 세운 뒤</strong>, 1반→2반→…→마지막반→마지막반→…→2반→1반 순으로
+       뱀이 기어가듯(ㄹ자) 한 명씩 나눠 담는 방식입니다. 이렇게 하면 <strong>모든 반의 평균 성적이 고르게</strong> 맞춰집니다.</p>
+    <div class="tip">기준성적이 비어 있거나 0인 학생은 맨 마지막에 이어서 배치됩니다.</div>
+  </section>
+
+  <section>
+    <h2><span class="num">4</span> 분리해야 할 학생 설정</h2>
+    <p>같은 반이 되면 안 되는 학생 쌍을 등록하면, 한 반에 같이 묶였을 때 <strong>빨갛게 경고 표시</strong>됩니다.</p>
+    <ul>
+      <li><strong>엑셀 업로드</strong> — A열·B열에 분리할 두 학생을 적은 파일을 올립니다. (이름 또는 학번)</li>
+      <li><strong>수동 추가</strong> — <code>+ 수동 추가</code> 버튼으로 직접 한 쌍씩 입력할 수 있습니다.</li>
+      <li><strong>접기/펼치기</strong> — 목록 제목(🚫)을 클릭하면 명단을 감췄다 보였다 할 수 있습니다.</li>
+    </ul>
+    <div class="warn">한 학생이 여러 명과 분리 대상이면, <strong>쌍을 따로따로</strong> 나눠 적습니다. (김 vs 이·박 → “김 이”, “김 박” 두 줄)</div>
+  </section>
+
+  <section>
+    <h2><span class="num">5</span> 직접 조정하기</h2>
+    <ul>
+      <li><strong>드래그로 교체</strong> — 학생 카드를 다른 반 학생 위로 끌어다 놓으면 두 학생의 반이 맞바뀝니다.</li>
+      <li><strong>되돌리기 / 다시 실행</strong> — 상단 <code>↩️ 되돌리기</code>(Ctrl+Z), <code>↪️ 다시 실행</code>(Ctrl+Y).</li>
+      <li><strong>학급별 분산 확인</strong> — 이전 학년 반 버튼을 누르면, 그 반 학생들이 새 반에 어떻게 흩어졌는지 강조됩니다.</li>
+      <li><strong>원래 배치로</strong> — 손댄 것을 처음 ㄹ자 배치 상태로 한 번에 되돌립니다.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">6</span> 저장 · 내보내기</h2>
+    <table>
+      <tr><th>버튼</th><th>하는 일</th></tr>
+      <tr><td><code>💾 작업 저장</code></td><td>현재 상태를 <strong>JSON 파일</strong>로 내려받습니다. 나중에 이어서 작업할 때 사용합니다.</td></tr>
+      <tr><td><code>📊 엑셀 다운로드</code></td><td>최종 <strong>반 명렬표 + 신학번 명단</strong>을 엑셀로 내려받습니다.</td></tr>
+      <tr><td>작업 파일 불러오기</td><td>첫 화면에서 저장해 둔 <strong>JSON 파일</strong>을 올려 작업을 복원합니다.</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="num">7</span> 개인정보 · 작업 이력</h2>
+    <div class="danger">
+      🛡️ 이 <strong>웹 버전</strong>은 작업 이력을 브라우저에 <strong>저장하지 않습니다.</strong>
+      새로고침하거나 창을 닫으면 작업이 사라집니다. 여러 학교가 같은 PC로 접속해도
+      앞사람의 명단이 남지 않습니다.
+    </div>
+    <p>따라서 <strong>작업을 보관하려면 반드시 <code>💾 작업 저장(JSON)</code> 또는 <code>📊 엑셀 다운로드</code></strong>로
+       파일을 직접 받아 두세요. 받은 파일은 학교 PC나 USB에 안전하게 보관합니다.</p>
+  </section>
+
+  <section>
+    <h2><span class="num">8</span> 샘플 파일로 먼저 체험하기</h2>
+    <p>실제 명단이 없어도 아래 <strong>익명화 샘플</strong>로 모든 기능을 시험해 볼 수 있습니다.
+       (이름은 <code>일영일</code>·<code>이영삼</code>처럼 가명으로 바꾼 데이터라 개인정보가 없습니다.)</p>
+    <div class="samples">
+      <div class="sample-card">
+        <div class="name">📄 임시반편성 샘플</div>
+        <div class="desc">구반·구번호·성명·성별·기준성적이 든 학생 데이터(194명, 남녀공학). <strong>1학년 → 2학년</strong>으로 골라 업로드하세요.</div>
+        <a class="dl" href="임시반편성_익명화.xlsx" download>⬇ 다운로드</a>
+      </div>
+      <div class="sample-card">
+        <div class="name">📄 분리대상 샘플</div>
+        <div class="desc">같은 반이 되면 안 되는 학생 쌍 목록(25쌍). “분리해야 할 학생 목록”에 업로드하세요.</div>
+        <a class="dl" href="분리대상_익명화.xlsx" download>⬇ 다운로드</a>
+      </div>
+    </div>
+    <div class="tip">
+      체험 순서: ① 샘플 2개 받기 → ② 프로그램 실행 → ③ <code>1학년 → 2학년</code> 선택 →
+      ④ 임시반편성 샘플 업로드 → ⑤ <code>ㄹ자 배치 실행</code> → ⑥ 분리대상 샘플 업로드.
+    </div>
+  </section>
+
+  <p class="footer">Crafted 2026 서울사대부중 과학정보부</p>
+</div>
+</body>
+</html>
