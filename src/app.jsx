@@ -80,7 +80,125 @@ function StatusLight({ label, done, detail }) {
     );
 }
 
-// 🧪 분반 조건 전수 검사기 모달 (108개 조합 시뮬레이터)
+// 🚫 분리해야 할 학생 관리 모달 (본문 상단을 차지하지 않고 팝업으로 분리)
+function SeparationModal({ onClose, separations, setSeparations, handleSeparationFile, updateSeparation, removeSeparation, addSeparation }) {
+    return (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, padding: '20px' }}>
+            <div style={{ background: '#fff', borderRadius: '20px', padding: '28px', maxWidth: '680px', width: '100%', maxHeight: '88vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.3)', border: '1px solid #e2e8f0' }}>
+                {/* 헤더 */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '26px' }}>🚫</span>
+                        <div>
+                            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span>분리해야 할 학생 관리</span>
+                                <span style={{ background: '#fee2e2', color: '#dc2626', fontSize: '13px', fontWeight: '800', padding: '2px 10px', borderRadius: '12px' }}>
+                                    {separations.length}쌍
+                                </span>
+                            </h2>
+                            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b' }}>
+                                같은 반에 배정되지 않아야 하는 학생 쌍을 등록하세요.
+                            </p>
+                        </div>
+                    </div>
+                    <button onClick={onClose} style={{ padding: '6px 14px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', fontSize: '13px', color: '#475569' }}>
+                        ✕ 닫기
+                    </button>
+                </div>
+
+                {/* 엑셀 파일 드래그 앤 드롭 업로드 */}
+                <div
+                    onDragOver={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.style.background = '#e0f2fe';
+                        e.currentTarget.style.borderColor = '#0284c7';
+                    }}
+                    onDragLeave={(e) => {
+                        e.currentTarget.style.background = '#f0f9ff';
+                        e.currentTarget.style.borderColor = '#38bdf8';
+                    }}
+                    onDrop={(e) => {
+                        e.preventDefault();
+                        e.currentTarget.style.background = '#f0f9ff';
+                        e.currentTarget.style.borderColor = '#38bdf8';
+                        const file = e.dataTransfer.files[0];
+                        if (file) handleSeparationFile(file);
+                    }}
+                    style={{ marginBottom: '18px', padding: '16px', background: '#f0f9ff', borderRadius: '14px', border: '2px dashed #38bdf8', transition: 'all 0.2s', textAlign: 'center' }}
+                >
+                    <div style={{ marginBottom: '6px', fontSize: '14.5px', color: '#0369a1', fontWeight: '800' }}>
+                        📎 분리 명단 엑셀 파일 업로드 (xlsx, xls)
+                    </div>
+                    <input
+                        type="file"
+                        accept=".xlsx,.xls"
+                        onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) handleSeparationFile(file);
+                            e.target.value = '';
+                        }}
+                        style={{ marginBottom: '6px', fontSize: '13px' }}
+                    />
+                    <div style={{ fontSize: '12px', color: '#64748b' }}>
+                        💡 파일 형식: A열(학생1), B열(학생2) 이름 또는 학번 | 엑셀 파일을 여기로 끌어다 놓으셔도 돼요
+                    </div>
+                </div>
+
+                {/* 수동 목록 */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '18px', maxHeight: '340px', overflowY: 'auto', paddingRight: '4px' }}>
+                    {separations.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '32px 20px', color: '#94a3b8', fontSize: '14px', background: '#f8fafc', borderRadius: '12px', border: '1px dashed #cbd5e1' }}>
+                            등록된 분리 대상 학생이 없습니다.
+                        </div>
+                    ) : (
+                        separations.map((sep, idx) => (
+                            <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center', background: '#f8fafc', padding: '8px 12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                                <span style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8', width: '22px' }}>{idx + 1}</span>
+                                <input
+                                    type="text"
+                                    placeholder="학생 1 (예: 오건우 또는 1101)"
+                                    value={sep.student1}
+                                    onChange={(e) => updateSeparation(idx, 'student1', e.target.value)}
+                                    style={{ flex: 1, padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '13.5px' }}
+                                />
+                                <span style={{ color: '#ef4444', fontWeight: '800' }}>↔️</span>
+                                <input
+                                    type="text"
+                                    placeholder="학생 2 (예: 서도현 또는 1205)"
+                                    value={sep.student2}
+                                    onChange={(e) => updateSeparation(idx, 'student2', e.target.value)}
+                                    style={{ flex: 1, padding: '8px 10px', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '13.5px' }}
+                                />
+                                <button onClick={() => removeSeparation(idx)} style={{ padding: '7px 12px', background: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca', borderRadius: '6px', cursor: 'pointer', fontWeight: '700', fontSize: '12.5px' }}>
+                                    삭제
+                                </button>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* 하단 액션 버튼 */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '14px', borderTop: '1px solid #e2e8f0' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={addSeparation} style={{ padding: '9px 16px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', fontSize: '13.5px' }}>
+                            + 수동 1쌍 추가
+                        </button>
+                        {separations.length > 0 && (
+                            <button onClick={() => { if (confirm('분리 대상 목록을 전부 삭제하시겠습니까?')) setSeparations([]); }} style={{ padding: '9px 16px', background: '#fff', color: '#ef4444', border: '1px solid #fecaca', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', fontSize: '13.5px' }}>
+                                전체 삭제
+                            </button>
+                        )}
+                    </div>
+                    <button onClick={onClose} style={{ padding: '10px 24px', background: '#10b981', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '800', fontSize: '14px' }}>
+                        적용 및 닫기
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// 🧪 다른 조건으로 테스트하기 모달 (다양한 환경 조건 시뮬레이터)
 function DiagnosticModal({ onClose, onApplyScenario }) {
     const [viewMode, setViewMode] = useState('representative'); // 'representative' | 'all'
 
@@ -200,13 +318,13 @@ function DiagnosticModal({ onClose, onApplyScenario }) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
                     <div>
                         <h2 style={{ margin: '0 0 6px 0', fontSize: '24px', fontWeight: '800', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span>🧪 분반 환경 전수 검사기</span>
+                            <span>🧪 다른 조건으로 테스트하기 (시뮬레이터)</span>
                             <span style={{ fontSize: '13px', background: '#dcfce7', color: '#15803d', padding: '3px 10px', borderRadius: '999px', fontWeight: '800' }}>
-                                108 / 108 PASS (100% 통과)
+                                108가지 조합 100% 검증 완료
                             </span>
                         </h2>
                         <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
-                            중·고등학교, 공학/남/여, 학번 자릿수, 성적순 ㄹ자 알고리즘의 모든 순열 조합을 전수 검증했습니다.
+                            학교급, 남녀공학/남/여, 반 개수, 학번 체계 등 다양한 조건으로 어떻게 배치되는지 미리 시뮬레이션해 볼 수 있습니다.
                         </p>
                     </div>
                     <button onClick={onClose} style={{ padding: '6px 14px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', cursor: 'pointer', fontWeight: '800', fontSize: '14px' }}>
@@ -342,7 +460,7 @@ function ClassAssignmentApp() {
     const [classes, setClasses] = useState({});
     const [separations, setSeparations] = useState([]);
     const [selectedStudent, setSelectedStudent] = useState(null);
-    const [showModal, setShowModal] = useState(false);
+    const [showSeparationModal, setShowSeparationModal] = useState(false);
     const [showDiagnostics, setShowDiagnostics] = useState(false); // 🧪 전수 검사 모달 state
     const [originalAssignment, setOriginalAssignment] = useState(null);
     const [highlightedOldClass, setHighlightedOldClass] = useState(null);
@@ -390,6 +508,7 @@ function ClassAssignmentApp() {
             setHistory([JSON.parse(JSON.stringify(data.classes))]);
             setHistoryIndex(0);
             setIsStarted(true);
+            window.location.hash = '#workspace';
             console.log('🔁 직전 작업 자동 복원됨');
         } catch (e) {
             console.warn('⚠️ 자동 복원 실패 (저장본 손상) - 무시하고 새로 시작:', e);
@@ -411,6 +530,46 @@ function ClassAssignmentApp() {
             console.warn('⚠️ 자동 저장 실패:', e);
         }
     }, [isStarted, studentData, classes, separations, originalAssignment, gradeTransition, numClasses, balanceGender, schoolType, genderMode, idFormat]);
+
+    // ─────────────────────────────────────────────────────────────
+    // URL 해시 기반 화면 동기화 (#home vs #workspace) & 뒤로가기 지원
+    // ─────────────────────────────────────────────────────────────
+    useEffect(() => {
+        function handleHashSync() {
+            const hash = window.location.hash;
+            if (hash === '#workspace') {
+                if (studentData && studentData.length > 0) {
+                    setIsStarted(true);
+                } else {
+                    window.location.hash = '#home';
+                    setIsStarted(false);
+                }
+            } else if (hash === '#home' || hash === '' || !hash) {
+                setIsStarted(false);
+            }
+        }
+
+        // 초기 URL 해시 확인
+        if (window.location.hash === '#workspace' && studentData && studentData.length > 0) {
+            setIsStarted(true);
+        } else if (!window.location.hash) {
+            window.location.hash = isStarted ? '#workspace' : '#home';
+        }
+
+        window.addEventListener('hashchange', handleHashSync);
+        return () => window.removeEventListener('hashchange', handleHashSync);
+    }, [studentData, isStarted]);
+
+    // Esc 키 누르면 선택 학생 취소
+    useEffect(() => {
+        function handleGlobalKeyDown(e) {
+            if (e.key === 'Escape') {
+                setSelectedStudent(null);
+            }
+        }
+        window.addEventListener('keydown', handleGlobalKeyDown);
+        return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+    }, []);
 
     // ─────────────────────────────────────────────────────────────
     // 견고한 입력 파서: 어떤 엑셀이 와도 필요한 필드를 뽑아낸다
@@ -1313,9 +1472,181 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
         return false;
     }
     
+    // 두 학생이 분리 규칙에 등록된 쌍인지 검사 (학번 및 성명 듀얼 검증)
+    function areSeparationPair(s1, s2) {
+        if (!s1 || !s2 || !separations || separations.length === 0) return false;
+        const id1 = String(s1.학번 || '');
+        const name1 = String(s1.성명 || '').trim();
+        const id2 = String(s2.학번 || '');
+        const name2 = String(s2.성명 || '').trim();
+        
+        for (const sep of separations) {
+            if (!sep.student1 || !sep.student2) continue;
+            const p1 = parseStudentInput(sep.student1);
+            const p2 = parseStudentInput(sep.student2);
+            
+            if (p1 && p2) {
+                if ((id1 === p1 && id2 === p2) || (id1 === p2 && id2 === p1)) return true;
+            }
+            
+            const t1 = String(sep.student1).trim();
+            const t2 = String(sep.student2).trim();
+            if ((t1 === name1 && t2 === name2) || (t1 === name2 && t2 === name1) ||
+                (t1 === id1 && t2 === id2) || (t1 === id2 && t2 === id1)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // 두 학생을 맞교체할 때 양쪽 반에서 새로운 분리 충돌이 발생하는지 전수 검사
+    function checkSwapSeparationConflict(studentA, studentB) {
+        if (!studentA || !studentB || !separations || separations.length === 0) {
+            return { conflict: false };
+        }
+        const classA = studentA.현재분반;
+        const classB = studentB.현재분반;
+        
+        // 1. studentA가 classB로 갔을 때: studentB를 제외한 classB 학생들과 분리 충돌 검사
+        const classBStudents = (classes[classB] || []).filter(s => s.id !== studentB.id);
+        for (const other of classBStudents) {
+            if (areSeparationPair(studentA, other)) {
+                return {
+                    conflict: true,
+                    reason: `${studentA.성명}(${studentA.학번})과(와) ${other.성명}(${other.학번})이(가) ${classB}반에서 함께 편성됩니다 (분리 대상)`
+                };
+            }
+        }
+        
+        // 2. studentB가 classA로 갔을 때: studentA를 제외한 classA 학생들과 분리 충돌 검사
+        const classAStudents = (classes[classA] || []).filter(s => s.id !== studentA.id);
+        for (const other of classAStudents) {
+            if (areSeparationPair(studentB, other)) {
+                return {
+                    conflict: true,
+                    reason: `${studentB.성명}(${studentB.학번})과(와) ${other.성명}(${other.학번})이(가) ${classA}반에서 함께 편성됩니다 (분리 대상)`
+                };
+            }
+        }
+        return { conflict: false };
+    }
+
+    // 선택된 학생 기준 교체 가능 후보군 맵핑 (불이 들어올 학생 vs 분리 충돌로 불 꺼질 학생)
+    const swapCandidateMap = useMemo(() => {
+        if (!selectedStudent || !studentData || !classes) return {};
+        
+        const nonZeroSorted = studentData.filter(s => s.기준성적 > 0).sort((a, b) => b.기준성적 - a.기준성적);
+        const selScore = selectedStudent.기준성적;
+        const isSelZero = (selScore === 0);
+        const selIndex = nonZeroSorted.findIndex(s => s.학번 === selectedStudent.학번);
+
+        let allowedIds = new Set();
+        
+        if (isSelZero) {
+            // 0점 학생: 다른 반의 0점 학생이거나, 하위 8명
+            Object.values(classes).flat().forEach(s => {
+                if (s.기준성적 === 0 && s.현재분반 !== selectedStudent.현재분반) {
+                    allowedIds.add(s.id);
+                }
+            });
+            const bottom8 = nonZeroSorted.slice(-8);
+            bottom8.forEach(s => {
+                const cur = Object.values(classes).flat().find(c => c.학번 === s.학번);
+                if (cur && cur.현재분반 !== selectedStudent.현재분반) {
+                    allowedIds.add(cur.id);
+                }
+            });
+        } else if (selIndex !== -1) {
+            // 성적 > 0: 주변 8명 범위 (위 4, 아래 4 또는 가장자리 시 보정)
+            const maxAbove = selIndex;
+            const maxBelow = nonZeroSorted.length - 1 - selIndex;
+            let allowedAbove = 4;
+            let allowedBelow = 4;
+            if (maxAbove < 4) {
+                allowedAbove = maxAbove;
+                allowedBelow = Math.min(8 - allowedAbove, maxBelow);
+            } else if (maxBelow < 4) {
+                allowedBelow = maxBelow;
+                allowedAbove = Math.min(8 - allowedBelow, maxAbove);
+            }
+            
+            const startIdx = Math.max(0, selIndex - allowedAbove);
+            const endIdx = Math.min(nonZeroSorted.length - 1, selIndex + allowedBelow);
+            
+            for (let i = startIdx; i <= endIdx; i++) {
+                if (i === selIndex) continue;
+                const cand = nonZeroSorted[i];
+                const cur = Object.values(classes).flat().find(c => c.학번 === cand.학번);
+                if (cur && cur.현재분반 !== selectedStudent.현재분반) {
+                    allowedIds.add(cur.id);
+                }
+            }
+            
+            // 하위 8위 이내면 0점 학생과도 교체 허용
+            const rankFromBottom = nonZeroSorted.length - selIndex;
+            if (rankFromBottom <= 8) {
+                Object.values(classes).flat().forEach(s => {
+                    if (s.기준성적 === 0 && s.현재분반 !== selectedStudent.현재분반) {
+                        allowedIds.add(s.id);
+                    }
+                });
+            }
+        }
+        
+        const result = {};
+        for (const candId of allowedIds) {
+            const candidate = Object.values(classes).flat().find(s => s.id === candId);
+            if (!candidate) continue;
+            
+            const conflictCheck = checkSwapSeparationConflict(selectedStudent, candidate);
+            const scoreDiffVal = Math.abs((selectedStudent.기준성적 || 0) - (candidate.기준성적 || 0));
+            result[candId] = {
+                isCandidate: true,
+                hasConflict: conflictCheck.conflict,
+                conflictReason: conflictCheck.reason,
+                scoreDiff: scoreDiffVal.toFixed(1)
+            };
+        }
+        return result;
+    }, [selectedStudent, studentData, classes, separations]);
+
+    // 학생 카드 직접 클릭 핸들러 (인라인 맞교체)
     function handleStudentClick(student) {
-        setSelectedStudent(student);
-        setShowModal(true);
+        if (!student) return;
+        
+        // 1) 아직 선택된 학생이 없음 -> 이 학생을 교체 출발 대상으로 선택
+        if (!selectedStudent) {
+            setSelectedStudent(student);
+            return;
+        }
+        
+        // 2) 이미 선택된 학생을 다시 클릭 -> 선택 취소
+        if (selectedStudent.id === student.id) {
+            setSelectedStudent(null);
+            return;
+        }
+        
+        // 3) 같은 반의 다른 학생을 클릭 -> 교체 출발 대상을 해당 학생으로 변경
+        if (selectedStudent.현재분반 === student.현재분반) {
+            setSelectedStudent(student);
+            return;
+        }
+        
+        // 4) 다른 반 학생을 클릭했을 때
+        const candInfo = swapCandidateMap[student.id];
+        if (candInfo) {
+            if (candInfo.hasConflict) {
+                // 분리 충돌 대상 (불이 꺼진 학생)
+                alert(`🚫 [교체 불가 - 분리 대상 충돌]\n\n${candInfo.conflictReason}\n\n분리 규칙을 지키기 위해 이 학생과는 교체할 수 없습니다.`);
+                return;
+            }
+            // 교체 가능 대상 (초록 불이 켜진 학생) -> 즉시 맞교체!
+            swapStudents(selectedStudent, student);
+            return;
+        }
+        
+        // 5) 성적 범위 밖 (후보가 아닌 학생)
+        alert(`⚠️ 성적 차이가 커서 교체할 수 없습니다.\n\nㄹ자 균형 배치를 유지하기 위해 초록색 불(교체 가능)이 켜진 학생 중에서 선택해 주세요.`);
     }
     
     function getRecommendations(student) {
@@ -1396,6 +1727,13 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
         if (draggedStudent.현재분반 === targetStudent.현재분반) {
             console.log('⚠️ 같은 반 학생끼리는 교체 불가');
             return; // 같은 반이면 무시
+        }
+        
+        // 분리 규칙 충돌 검사
+        const dragConflict = checkSwapSeparationConflict(draggedStudent, targetStudent);
+        if (dragConflict.conflict) {
+            alert(`🚫 [교체 불가 - 분리 대상 충돌]\n\n${dragConflict.reason}\n\n분리 규칙을 지키기 위해 두 학생을 맞교체할 수 없습니다.`);
+            return;
         }
         
         console.log(`🔄 교체 시도: ${draggedStudent.성명}(${draggedStudent.현재분반}반) ↔ ${targetStudent.성명}(${targetStudent.현재분반}반)`);
@@ -1531,7 +1869,6 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
         
         setClasses(newClasses);
         addToHistory(newClasses);
-        setShowModal(false);
         setSelectedStudent(null);
     }
     
@@ -2087,6 +2424,36 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
                                 설치나 회원가입 없이, 샘플 명단으로 바로 둘러보거나 우리 학교 엑셀 명단을 올려주세요.
                             </p>
 
+                            {/* 직전 작업 이어하기 버튼 (데이터가 있을 때 최상단 노출) */}
+                            {studentData && studentData.length > 0 && (
+                                <button
+                                    onClick={() => {
+                                        window.location.hash = '#workspace';
+                                        setIsStarted(true);
+                                    }}
+                                    style={{
+                                        width: '100%',
+                                        padding: '17px 24px',
+                                        background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '14px',
+                                        fontWeight: '800',
+                                        fontSize: '18px',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 6px 20px rgba(37, 99, 235, 0.35)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '10px',
+                                        marginBottom: '14px',
+                                        transition: 'transform 0.15s, box-shadow 0.15s'
+                                    }}
+                                >
+                                    <span>➡️ 진행 중이던 분반 배치 화면으로 이동 ({studentData.length}명)</span>
+                                </button>
+                            )}
+
                             {/* 1순위: 샘플 체험 버튼 (글자 18px 큼직) */}
                             <button
                                 onClick={() => loadSampleDemo({ schoolType, genderMode, idFormat, gradeTransition })}
@@ -2457,55 +2824,101 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
 
     return (
         <div style={{ maxWidth: '1800px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
-            {/* 헤더 */}
-            <div style={{ 
-                textAlign: 'center', 
-                marginBottom: '25px',
-                padding: '24px 20px',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                borderRadius: '14px',
-                boxShadow: '0 4px 14px rgba(0,0,0,0.15)'
+            {/* 상단 모던 헤더 & 홈으로 돌아가기 */}
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '20px',
+                padding: '16px 24px',
+                background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+                borderRadius: '16px',
+                boxShadow: '0 4px 20px rgba(15, 23, 42, 0.15)',
+                color: 'white',
+                flexWrap: 'wrap',
+                gap: '16px'
             }}>
-                <h1 style={{ margin: '0 0 6px 0', color: '#fff', fontSize: '32px', fontFamily: "'Wanted Sans Variable', 'Wanted Sans', 'Pretendard Variable', Pretendard, sans-serif", fontWeight: '800', letterSpacing: '-1px', textShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
-                    🎓 {schoolType === 'high' ? '고등학교' : '중학교'} 분반 배치 시스템
-                </h1>
-                <h2 style={{ margin: '0 0 12px 0', color: '#ffe066', fontSize: '16px', fontFamily: "'Pretendard Variable', Pretendard, sans-serif", fontWeight: '600', letterSpacing: '-0.3px' }}>
-                    💣 폭탄돌리기 방지 • 데이터 기반 학급 편성
-                </h2>
-                <div style={{ display: 'inline-flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <span style={{ background: 'rgba(255,255,255,0.22)', color: '#fff', padding: '4px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: '700' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                    <button
+                        onClick={() => {
+                            window.location.hash = '#home';
+                            setIsStarted(false);
+                        }}
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '7px',
+                            padding: '10px 18px',
+                            background: 'rgba(255, 255, 255, 0.12)',
+                            color: '#ffffff',
+                            border: '1px solid rgba(255, 255, 255, 0.25)',
+                            borderRadius: '10px',
+                            fontSize: '14px',
+                            fontWeight: '800',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.22)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                        title="시작 화면으로 돌아가기 (작업 내용은 안전하게 보관됩니다)"
+                    >
+                        <span>🏠</span>
+                        <span>시작 화면으로 돌아가기</span>
+                    </button>
+                    <div>
+                        <h1 style={{
+                            margin: '0 0 4px 0',
+                            fontSize: '24px',
+                            fontWeight: '800',
+                            color: '#ffffff',
+                            letterSpacing: '-0.5px',
+                            fontFamily: "'Wanted Sans Variable', 'Wanted Sans', 'Pretendard Variable', Pretendard, sans-serif"
+                        }}>
+                            🎓 {schoolType === 'high' ? '고등학교' : '중학교'} 분반 배치 시스템
+                        </h1>
+                        <div style={{ fontSize: '13px', color: '#94a3b8' }}>
+                            데이터 기반 공평 균등 학급 편성 • 클릭 인라인 실시간 맞교체
+                        </div>
+                    </div>
+                </div>
+
+                {/* 우측 메타데이터 뱃지 */}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)', color: '#e2e8f0', padding: '5px 12px', borderRadius: '999px', fontSize: '12.5px', fontWeight: '700' }}>
                         🏫 {schoolType === 'high' ? '고등학교' : '중학교'}
                     </span>
-                    <span style={{ background: 'rgba(255,255,255,0.22)', color: '#fff', padding: '4px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: '700' }}>
+                    <span style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)', color: '#e2e8f0', padding: '5px 12px', borderRadius: '999px', fontSize: '12.5px', fontWeight: '700' }}>
                         👥 {genderMode === 'coed' ? '남녀공학' : (genderMode === 'boys' ? '남학교' : '여학교')}
                     </span>
-                    <span style={{ background: 'rgba(255,255,255,0.22)', color: '#fff', padding: '4px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: '700' }}>
-                        🏷️ {idFormat === '4digit' && numClasses < 10 ? '4자리 학번(2101)' : '5자리 학번(20101)'}
+                    <span style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)', color: '#e2e8f0', padding: '5px 12px', borderRadius: '999px', fontSize: '12.5px', fontWeight: '700' }}>
+                        🏷️ {idFormat === '4digit' && numClasses < 10 ? '4자리 학번' : '5자리 학번'}
                     </span>
-                    <span style={{ background: 'rgba(255,255,255,0.22)', color: '#fff', padding: '4px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: '700' }}>
+                    <span style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)', color: '#e2e8f0', padding: '5px 12px', borderRadius: '999px', fontSize: '12.5px', fontWeight: '700' }}>
                         📚 {gradeTransition === 'freshman' ? '신입생 배정' : (gradeTransition === '1to2' ? (schoolType === 'high' ? '고1→고2' : '1→2학년') : (schoolType === 'high' ? '고2→고3' : '2→3학년'))}
                     </span>
                 </div>
             </div>
 
-            {/* 데이터 업로드 상태 표시등 */}
+            {/* 데이터 상태 표시등 */}
             <div style={{ display: 'flex', gap: '12px', marginBottom: '18px', flexWrap: 'wrap', alignItems: 'center' }}>
                 <StatusLight
-                    label="학생 데이터"
+                    label="학생 명단"
                     done={!!(studentData && studentData.length > 0)}
                     detail={studentData && studentData.length > 0 ? `${studentData.length}명` : null}
                 />
                 <StatusLight
-                    label="분리 학생 데이터"
+                    label="분리 학생 규칙"
                     done={separations.length > 0}
-                    detail={separations.length > 0 ? `${separations.length}쌍` : null}
+                    detail={separations.length > 0 ? `${separations.length}쌍 등록됨` : '미등록 (클릭하여 추가 가능)'}
                 />
             </div>
 
-            <div style={{ display: 'flex', gap: '14px', marginBottom: '24px', flexWrap: 'wrap', alignItems: 'stretch' }}>
-                {/* ── 섹터 1: 초기 세팅 & 옵션 ── */}
-                <ToolbarGroup label="초기 세팅 & 옵션" accent="#10b981">
-                    <ToolbarButton onClick={doLShapeAssignment} grad="linear-gradient(135deg, #34d399 0%, #059669 100%)" title="성적 및 성비 균형으로 학급 재배치">
+            {/* 메인 조작 툴바 */}
+            <div style={{ display: 'flex', gap: '14px', marginBottom: '22px', flexWrap: 'wrap', alignItems: 'stretch' }}>
+                {/* ── 섹터 1: 편성 & 규칙 관리 ── */}
+                <ToolbarGroup label="편성 & 규칙 관리" accent="#4f46e5">
+                    <ToolbarButton onClick={doLShapeAssignment} grad="linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)" title="성적 및 성비 균형으로 학급 재배치">
                         🎯 ㄹ자 균등 재배치
                     </ToolbarButton>
                     {genderMode === 'coed' ? (
@@ -2576,274 +2989,319 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
                             ⚠️ 10반 이상 5자리 자동 적용
                         </div>
                     )}
-                    <ToolbarButton onClick={resetToOriginal} grad="linear-gradient(135deg, #60a5fa 0%, #2563eb 100%)">
+                    {/* 분리 대상 관리 모달 호출 버튼 */}
+                    <ToolbarButton
+                        onClick={() => setShowSeparationModal(true)}
+                        grad="linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)"
+                        title="분리해야 할 학생 쌍 등록/엑셀 업로드 팝업 열기">
+                        🚫 분리 학생 관리 ({separations.length}쌍)
+                    </ToolbarButton>
+                    <ToolbarButton onClick={resetToOriginal} grad="linear-gradient(135deg, #0284c7 0%, #0369a1 100%)">
                         ♻️ 원래 배치로
                     </ToolbarButton>
-                    <ToolbarButton onClick={() => setShowDiagnostics(true)} grad="linear-gradient(135deg, #a855f7 0%, #7e22ce 100%)" title="108가지 분반 조합 전수 검사기 열기">
-                        🧪 전수 검사기
+                    <ToolbarButton onClick={() => setShowDiagnostics(true)} grad="linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)" title="108가지 분반 환경 조건 시뮬레이션">
+                        🧪 다른 조건으로 테스트하기
                     </ToolbarButton>
                     <ToolbarButton
                         onClick={() => { if (confirm('모든 작업이 초기화됩니다. 처음부터 다시 시작하시겠습니까?')) startNewWork(); }}
-                        grad="linear-gradient(135deg, #f87171 0%, #dc2626 100%)">
+                        grad="linear-gradient(135deg, #64748b 0%, #475569 100%)">
                         🔄 새 파일로 다시 시작
                     </ToolbarButton>
                 </ToolbarGroup>
 
-                {/* ── 섹터 2: 내보내기 ── */}
-                <ToolbarGroup label="내보내기" accent="#f59e0b">
-                    <ToolbarButton onClick={saveWorkToFile} grad="linear-gradient(135deg, #fbbf24 0%, #d97706 100%)">
+                {/* ── 섹터 2: 내보내기 & 보관 ── */}
+                <ToolbarGroup label="내보내기 & 보관" accent="#059669">
+                    <ToolbarButton onClick={saveWorkToFile} grad="linear-gradient(135deg, #475569 0%, #334155 100%)">
                         💾 작업 저장
                     </ToolbarButton>
-                    <ToolbarButton onClick={exportToExcel} grad="linear-gradient(135deg, #34d399 0%, #047857 100%)">
+                    <ToolbarButton onClick={exportToExcel} grad="linear-gradient(135deg, #059669 0%, #047857 100%)">
                         📊 엑셀 다운로드
                     </ToolbarButton>
-                    <ToolbarButton onClick={downloadOfflineHtml} grad="linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)" title="학교 업무망 PC에서 인터넷 없이 쓸 수 있는 단일 HTML 다운로드">
+                    <ToolbarButton onClick={downloadOfflineHtml} grad="linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)" title="학교 업무망 PC에서 인터넷 없이 쓸 수 있는 단일 HTML 다운로드">
                         🔒 오프라인 HTML 저장
                     </ToolbarButton>
                 </ToolbarGroup>
             </div>
-            
-            <div style={{ marginBottom: '20px', padding: '15px', background: '#f9f9f9', borderRadius: '5px' }}>
-                <div
-                    onClick={() => setSeparationOpen(o => !o)}
-                    style={{
-                        display: 'flex', alignItems: 'center', gap: '8px',
-                        cursor: 'pointer', userSelect: 'none',
-                        marginBottom: separationOpen ? '10px' : '0'
-                    }}
-                >
-                    <span style={{
-                        display: 'inline-block', transition: 'transform 0.2s',
-                        transform: separationOpen ? 'rotate(90deg)' : 'rotate(0deg)',
-                        color: '#888', fontSize: '14px'
-                    }}>▶</span>
-                    <h3 style={{ margin: 0, color: '#555' }}>🚫 분리해야 할 학생 목록</h3>
-                    {separations.length > 0 && (
-                        <span style={{
-                            background: '#f44336', color: 'white', fontSize: '12px', fontWeight: 'bold',
-                            padding: '2px 9px', borderRadius: '11px'
-                        }}>{separations.length}쌍</span>
-                    )}
-                    <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#999' }}>
-                        {separationOpen ? '접기 ▲' : '펼치기 ▼'}
-                    </span>
-                </div>
 
-                {separationOpen && (<>
-                <div
-                    onDragOver={(e) => {
-                        e.preventDefault();
-                        e.currentTarget.style.background = '#bbdefb';
-                        e.currentTarget.style.borderColor = '#1976d2';
-                    }}
-                    onDragLeave={(e) => {
-                        e.currentTarget.style.background = '#e3f2fd';
-                        e.currentTarget.style.borderColor = '#2196F3';
-                    }}
-                    onDrop={(e) => {
-                        e.preventDefault();
-                        e.currentTarget.style.background = '#e3f2fd';
-                        e.currentTarget.style.borderColor = '#2196F3';
-                        
-                        const file = e.dataTransfer.files[0];
-                        if (file) {
-                            handleSeparationFile(file);
-                        }
-                    }}
-                    style={{ marginBottom: '15px', padding: '15px', background: '#e3f2fd', borderRadius: '5px', border: '2px dashed #2196F3', transition: 'all 0.2s', cursor: 'pointer' }}
-                >
-                    <div style={{ marginBottom: '10px', fontSize: '14px', color: '#1976d2', fontWeight: 'bold' }}>
-                        📎 엑셀 파일 업로드 (xlsx, xls)
-                    </div>
-                    <input
-                        type="file"
-                        accept=".xlsx,.xls"
-                        onChange={(e) => {
-                            const file = e.target.files[0];
-                            if (file) handleSeparationFile(file);
-                            // 같은 파일 다시 선택 가능하도록 value 리셋
-                            e.target.value = '';
-                        }}
-                        style={{ marginBottom: '10px' }}
-                    />
-                    <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-                        💡 파일 형식: A열-학생1, B열-학생2 (이름 또는 학번)<br/>
-                        🖱️ 파일을 이 영역에 드래그 앤 드랍하거나 위 버튼으로 선택하세요
-                    </div>
-                </div>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '10px' }}>
-                    {separations.map((sep, idx) => (
-                        <div key={idx} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                            <input
-                                type="text"
-                                placeholder="예: 일영사 또는 1104"
-                                value={sep.student1}
-                                onChange={(e) => updateSeparation(idx, 'student1', e.target.value)}
-                                style={{ flex: 1, padding: '8px', border: '1px solid #ddd', borderRadius: '3px' }}
-                            />
-                            <span>↔️</span>
-                            <input
-                                type="text"
-                                placeholder="예: 이영일 또는 1201"
-                                value={sep.student2}
-                                onChange={(e) => updateSeparation(idx, 'student2', e.target.value)}
-                                style={{ flex: 1, padding: '8px', border: '1px solid #ddd', borderRadius: '3px' }}
-                            />
-                            <button onClick={() => removeSeparation(idx)} style={{ padding: '8px 15px', background: '#f44336', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>
-                                삭제
-                            </button>
-                        </div>
-                    ))}
-                </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <button onClick={addSeparation} style={{ padding: '8px 15px', background: '#2196F3', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>
-                        + 수동 추가
-                    </button>
-                    {separations.length > 0 && (
-                        <button onClick={() => setSeparations([])} style={{ padding: '8px 15px', background: '#f44336', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>
-                            전체 삭제
-                        </button>
-                    )}
-                </div>
-                </>)}
-            </div>
-
+            {/* 구학년 학급별 분산 필터 (세련된 SaaS 스타일) */}
             {Object.keys(classes).length > 0 && (
-                <div style={{ marginBottom: '20px', padding: '15px', background: '#fff3e0', borderRadius: '5px' }}>
-                    <h3 style={{ marginBottom: '10px', color: '#555' }}>👥 {oldGradeLabel} 학급별 분산 확인</h3>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        {Array.from({ length: numClasses }, (_, i) => i + 1).map(oldClass => (
-                            <button
-                                key={oldClass}
-                                onClick={() => setHighlightedOldClass(highlightedOldClass === oldClass ? null : oldClass)}
-                                style={{
-                                    padding: '10px 20px',
-                                    background: highlightedOldClass === oldClass ? '#ff9800' : '#fff',
-                                    color: highlightedOldClass === oldClass ? '#fff' : '#333',
-                                    border: `2px solid ${highlightedOldClass === oldClass ? '#ff9800' : '#ddd'}`,
-                                    borderRadius: '5px',
-                                    cursor: 'pointer',
-                                    fontWeight: 'bold',
-                                    transition: 'all 0.2s'
-                                }}
-                            >
-                                {oldGradeNum}-{oldClass}반
-                            </button>
-                        ))}
+                <div style={{
+                    marginBottom: '18px',
+                    padding: '16px 20px',
+                    background: '#ffffff',
+                    borderRadius: '14px',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '15px' }}>👥</span>
+                            <span style={{ fontSize: '14px', fontWeight: '800', color: '#1e293b' }}>
+                                {oldGradeLabel} 이전 반별 분산 확인
+                            </span>
+                            <span style={{ fontSize: '12px', color: '#64748b' }}>
+                                (특정 반 학생들이 새 학급에 고루 흩어졌는지 클릭하여 하이라이트)
+                            </span>
+                        </div>
                         {highlightedOldClass && (
                             <button
                                 onClick={() => setHighlightedOldClass(null)}
-                                title="선택한 반 강조 표시를 끕니다 (작업은 그대로 유지)"
                                 style={{
-                                    padding: '10px 20px',
-                                    background: '#6b7280',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '5px',
+                                    padding: '5px 12px',
+                                    background: '#f1f5f9',
+                                    color: '#475569',
+                                    border: '1px solid #cbd5e1',
+                                    borderRadius: '7px',
                                     cursor: 'pointer',
-                                    fontWeight: 'bold'
+                                    fontWeight: '700',
+                                    fontSize: '12px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
                                 }}
                             >
-                                ✕ 선택 해제
+                                <span>✕</span> <span>강조 해제</span>
                             </button>
                         )}
                     </div>
+
+                    <div style={{ display: 'flex', gap: '7px', flexWrap: 'wrap' }}>
+                        {Array.from({ length: numClasses }, (_, i) => i + 1).map(oldClass => {
+                            const isSelected = highlightedOldClass === oldClass;
+                            return (
+                                <button
+                                    key={oldClass}
+                                    onClick={() => setHighlightedOldClass(isSelected ? null : oldClass)}
+                                    style={{
+                                        padding: '7px 14px',
+                                        background: isSelected ? '#4f46e5' : '#f8fafc',
+                                        color: isSelected ? '#ffffff' : '#334155',
+                                        border: `1.5px solid ${isSelected ? '#4338ca' : '#cbd5e1'}`,
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        fontWeight: isSelected ? '800' : '600',
+                                        fontSize: '13px',
+                                        boxShadow: isSelected ? '0 2px 8px rgba(79, 70, 229, 0.3)' : 'none',
+                                        transition: 'all 0.15s ease'
+                                    }}
+                                >
+                                    {oldGradeNum}-{oldClass}반
+                                </button>
+                            );
+                        })}
+                    </div>
+
                     {highlightedOldClass && (() => {
                         const summary = getOldClassDistributionSummary(highlightedOldClass);
-                        const summaryText = Object.entries(summary)
-                            .map(([newClass, count]) => {
-                                // 6명 이상이면 빨간색, 아니면 파란색
-                                const color = count >= 6 ? '#d32f2f' : '#1976d2';
-                                return `<span style="color: ${color}; font-weight: bold; font-size: 28px;">${newClass}반-${count}명</span>`;
-                            })
-                            .join(' ');
                         return (
-                            <div 
-                                style={{ marginTop: '15px', padding: '15px', background: '#ffe0b2', borderRadius: '5px', fontSize: '20px', fontWeight: 'bold', color: '#e65100' }}
-                                dangerouslySetInnerHTML={{ __html: `📊 ${oldGradeLabel} ${highlightedOldClass}반 배치 현황: ${summaryText}` }}
-                            />
+                            <div style={{
+                                marginTop: '14px',
+                                padding: '12px 16px',
+                                background: '#f8fafc',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '10px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                flexWrap: 'wrap'
+                            }}>
+                                <span style={{ fontSize: '13px', fontWeight: '800', color: '#0f172a' }}>
+                                    📊 {oldGradeLabel} {highlightedOldClass}반 학생들의 새 학급 배치:
+                                </span>
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                    {Object.entries(summary).map(([newClass, count]) => {
+                                        const isDense = count >= 6;
+                                        return (
+                                            <span
+                                                key={newClass}
+                                                style={{
+                                                    padding: '3px 10px',
+                                                    borderRadius: '6px',
+                                                    fontSize: '13px',
+                                                    fontWeight: '800',
+                                                    background: isDense ? '#fef2f2' : '#f0fdf4',
+                                                    color: isDense ? '#dc2626' : '#16a34a',
+                                                    border: `1px solid ${isDense ? '#fecaca' : '#bbf7d0'}`
+                                                }}
+                                            >
+                                                {newClass}반: {count}명 {isDense && '⚠️ 집중'}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         );
                     })()}
                 </div>
             )}
             
-            {/* ── 배치 작업: 되돌리기 / 다시 실행 (검색창 위) ── */}
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
-                <ToolbarButton onClick={undo} disabled={historyIndex <= 0 || history.length === 0}
-                    grad="linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)" title="되돌리기 (Ctrl+Z / ⌘Z)">
-                    ↩️ 되돌리기 (Ctrl/⌘+Z)
-                </ToolbarButton>
-                <ToolbarButton onClick={redo} disabled={historyIndex >= history.length - 1 || history.length === 0}
-                    grad="linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)" title="다시 실행 (Ctrl+Y / ⌘⇧Z)">
-                    ↪️ 다시 실행 (Ctrl/⌘+Y)
-                </ToolbarButton>
+            {/* 되돌리기 / 다시 실행 및 실시간 학생 검색 바 */}
+            <div style={{
+                display: 'flex',
+                gap: '12px',
+                marginBottom: '18px',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+            }}>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <ToolbarButton
+                        onClick={undo}
+                        disabled={historyIndex <= 0 || history.length === 0}
+                        grad="linear-gradient(135deg, #475569 0%, #334155 100%)"
+                        title="되돌리기 (Ctrl+Z / ⌘Z)">
+                        ↩️ 되돌리기 (Ctrl+Z)
+                    </ToolbarButton>
+                    <ToolbarButton
+                        onClick={redo}
+                        disabled={historyIndex >= history.length - 1 || history.length === 0}
+                        grad="linear-gradient(135deg, #475569 0%, #334155 100%)"
+                        title="다시 실행 (Ctrl+Y / ⌘⇧Z)">
+                        ↪️ 다시 실행 (Ctrl+Y)
+                    </ToolbarButton>
+                </div>
+
+                {/* 검색 바 */}
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', minWidth: '320px', flex: '0 1 420px' }}>
+                    <div style={{ position: 'relative', width: '100%' }}>
+                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '14px' }}>
+                            🔍
+                        </span>
+                        <input
+                            type="text"
+                            placeholder="학생 성명 또는 학번 검색..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '9px 36px 9px 34px',
+                                border: '1.5px solid #cbd5e1',
+                                borderRadius: '9px',
+                                fontSize: '13.5px',
+                                boxSizing: 'border-box',
+                                outline: 'none',
+                                transition: 'border-color 0.15s, box-shadow 0.15s'
+                            }}
+                            onFocus={e => { e.currentTarget.style.borderColor = '#4f46e5'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(79,70,229,0.15)'; }}
+                            onBlur={e => { e.currentTarget.style.borderColor = '#cbd5e1'; e.currentTarget.style.boxShadow = 'none'; }}
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                style={{
+                                    position: 'absolute',
+                                    right: '8px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    color: '#94a3b8',
+                                    cursor: 'pointer',
+                                    fontSize: '15px',
+                                    padding: '4px'
+                                }}
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+                </div>
             </div>
 
-            <div style={{ marginBottom: '20px', padding: '15px', background: '#e8f5e9', borderRadius: '5px' }}>
-                <h3 style={{ marginBottom: '10px', color: '#555' }}>🔍 학생 검색</h3>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <input
-                        type="text"
-                        placeholder="학생 이름 또는 학번 입력 (예: 일영사, 104)"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{ flex: 1, padding: '10px', border: '2px solid #4CAF50', borderRadius: '5px', fontSize: '14px' }}
-                    />
-                    {searchQuery && (
-                        <button 
-                            onClick={() => setSearchQuery('')}
-                            style={{ padding: '10px 15px', background: '#f44336', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}
-                        >
-                            지우기
-                        </button>
-                    )}
-                </div>
-                {searchQuery && (() => {
-                    const foundStudents = findStudents(searchQuery);
-                    if (foundStudents.length > 1) {
-                        // 동명이인!
-                        return (
-                            <div style={{ marginTop: '10px', padding: '12px', background: '#fff3cd', border: '2px solid #ffc107', borderRadius: '5px' }}>
-                                <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#856404', marginBottom: '8px' }}>
-                                    ⚠️ 같은 이름을 가진 학생들이 {foundStudents.length}명 있습니다!
-                                </div>
-                                <div style={{ fontSize: '13px', color: '#856404', marginBottom: '8px' }}>
-                                    이름 대신 <strong>학번</strong>을 입력해주세요:
-                                </div>
-                                {foundStudents.map((student, idx) => (
-                                    <div 
-                                        key={idx}
-                                        style={{ 
-                                            padding: '8px', 
-                                            background: 'white', 
-                                            border: '1px solid #ffc107',
-                                            borderRadius: '3px', 
-                                            marginBottom: idx < foundStudents.length - 1 ? '5px' : '0',
-                                            fontSize: '13px'
-                                        }}
-                                    >
-                                        📌 <strong style={{ color: '#d32f2f' }}>{student.학번}</strong> {student.성명} - {student.현재분반}반 (성적: {student.기준성적})
-                                    </div>
+            {/* 검색 결과 안내 배너 */}
+            {searchQuery && (() => {
+                const foundStudents = findStudents(searchQuery);
+                if (foundStudents.length > 1) {
+                    return (
+                        <div style={{ marginBottom: '16px', padding: '12px 18px', background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '10px' }}>
+                            <div style={{ fontSize: '13.5px', fontWeight: '800', color: '#b45309', marginBottom: '6px' }}>
+                                ⚠️ 동명이인이 {foundStudents.length}명 검색되었습니다. 정확한 구분을 위해 학번으로 확인해 주세요:
+                            </div>
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                {foundStudents.map((s, idx) => (
+                                    <span key={idx} style={{ background: '#ffffff', padding: '4px 10px', borderRadius: '6px', border: '1px solid #fde68a', fontSize: '13px', color: '#92400e' }}>
+                                        📌 <strong>{s.학번}</strong> {s.성명} ({s.현재분반}반 | 성적 {s.기준성적})
+                                    </span>
                                 ))}
                             </div>
-                        );
-                    } else if (foundStudents.length === 1) {
-                        const found = foundStudents[0];
-                        return (
-                            <div style={{ marginTop: '10px', padding: '10px', background: '#c8e6c9', borderRadius: '3px', fontSize: '14px' }}>
-                                ✅ <strong>{found.학번} {found.성명}</strong> - 현재 <strong>{found.현재분반}반</strong>에 배치됨 (성적: {found.기준성적})
+                        </div>
+                    );
+                } else if (foundStudents.length === 1) {
+                    const f = foundStudents[0];
+                    return (
+                        <div style={{ marginBottom: '16px', padding: '10px 16px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', fontSize: '13.5px', color: '#166534', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span>✅</span>
+                            <span><strong>{f.학번} {f.성명}</strong> 학생은 현재 <strong>{f.현재분반}반</strong>에 편성되어 있습니다. (성적: {f.기준성적})</span>
+                        </div>
+                    );
+                } else {
+                    return (
+                        <div style={{ marginBottom: '16px', padding: '10px 16px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', fontSize: '13.5px', color: '#991b1b' }}>
+                            ❌ 일치하는 학생이 없습니다.
+                        </div>
+                    );
+                }
+            })()}
+
+            {/* 🔥 학생 선택 시 상단 고정 안내 배너 (인라인 맞교체 모드) */}
+            {selectedStudent && (
+                <div style={{
+                    position: 'sticky',
+                    top: '12px',
+                    zIndex: 100,
+                    marginBottom: '18px',
+                    padding: '14px 22px',
+                    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+                    color: 'white',
+                    borderRadius: '14px',
+                    boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.35), 0 8px 10px -6px rgba(15, 23, 42, 0.35)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '12px',
+                    border: '1.5px solid rgba(56, 189, 248, 0.3)'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                        <span style={{ fontSize: '24px' }}>🔄</span>
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: '16.5px', fontWeight: '800', color: '#38bdf8' }}>
+                                    {selectedStudent.학번} {selectedStudent.성명} ({selectedStudent.현재분반}반)
+                                </span>
+                                <span style={{ fontSize: '13px', background: '#0284c7', color: 'white', padding: '2px 9px', borderRadius: '6px', fontWeight: '800' }}>
+                                    기준성적 {selectedStudent.기준성적}
+                                </span>
+                                <span style={{ fontSize: '13.5px', color: '#f1f5f9' }}>
+                                    학생이 선택되었습니다.
+                                </span>
                             </div>
-                        );
-                    } else {
-                        return (
-                            <div style={{ marginTop: '10px', padding: '10px', background: '#ffcdd2', borderRadius: '3px', fontSize: '14px' }}>
-                                ❌ 검색 결과가 없습니다.
+                            <div style={{ fontSize: '13px', color: '#cbd5e1', marginTop: '4px' }}>
+                                다른 반에서 <span style={{ color: '#34d399', fontWeight: '800' }}>초록색 불이 켜진 학생</span>을 클릭하면 즉시 맞교체됩니다. <span style={{ color: '#fca5a5' }}>(분리 규칙 충돌 학생은 불이 꺼져 선택 불가)</span>
                             </div>
-                        );
-                    }
-                })()}
-            </div>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => setSelectedStudent(null)}
+                        style={{
+                            padding: '8px 18px',
+                            background: 'rgba(255,255,255,0.14)',
+                            color: '#ffffff',
+                            border: '1px solid rgba(255,255,255,0.25)',
+                            borderRadius: '8px',
+                            fontSize: '13.5px',
+                            fontWeight: '800',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.25)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.14)'}
+                        title="교체 모드 취소 (Esc)"
+                    >
+                        ✕ 교체 취소 (Esc)
+                    </button>
+                </div>
+            )}
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
                 {Array.from({ length: numClasses }, (_, i) => i + 1).map(classNum => {
@@ -2916,43 +3374,99 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
                                     const oldClassDist = getOldClassDistribution(classNum);
                                     const isOvercrowded = highlightedOldClass && student.구반 === highlightedOldClass && oldClassDist[highlightedOldClass] >= 6;
                                     
-                                    let bgColor = '#f9f9f9';
-                                    let borderColor = '#e0e0e0';
-                                    
-                                    // 1학년 반 클릭 시에는 해당 하이라이트만 표시
-                                    if (highlightedOldClass) {
-                                        if (isOvercrowded) {
-                                            bgColor = '#ffebee';
-                                            borderColor = '#d32f2f';
-                                        } else if (isHighlighted) {
-                                            bgColor = '#fff3e0';
-                                            borderColor = '#ff9800';
-                                        } else {
-                                            // 하이라이트 아닌 학생은 기본 색상
-                                            bgColor = '#f9f9f9';
-                                            borderColor = '#e0e0e0';
+                                    // ── 교체 모드 (selectedStudent가 존재할 때) 상태 판정 ──
+                                    const isSelected = selectedStudent && selectedStudent.id === student.id;
+                                    const candInfo = selectedStudent ? swapCandidateMap[student.id] : null;
+                                    const isCandEligible = candInfo && !candInfo.hasConflict;
+                                    const isCandConflict = candInfo && candInfo.hasConflict;
+                                    const isSameClass = selectedStudent && selectedStudent.현재분반 === student.현재분반 && !isSelected;
+                                    const isInactive = selectedStudent && !isSelected && !candInfo && !isSameClass;
+
+                                    let bgColor = '#ffffff';
+                                    let borderColor = '#e2e8f0';
+                                    let borderWidth = '1.5px';
+                                    let borderStyle = 'solid';
+                                    let cardBoxShadow = '0 1px 3px rgba(0,0,0,0.04)';
+                                    let cardOpacity = 1;
+                                    let cardCursor = 'pointer';
+
+                                    if (selectedStudent) {
+                                        if (isSelected) {
+                                            bgColor = '#eff6ff';
+                                            borderColor = '#2563eb';
+                                            borderWidth = '2px';
+                                            cardBoxShadow = '0 0 0 3px rgba(37,99,235,0.25), 0 4px 12px rgba(37,99,235,0.25)';
+                                            cardCursor = 'pointer';
+                                        } else if (isCandEligible) {
+                                            // 🔥 "불이 들어옴" - 교체 가능한 학생 (초록빛 글로우)
+                                            bgColor = '#ecfdf5';
+                                            borderColor = '#10b981';
+                                            borderWidth = '2px';
+                                            cardBoxShadow = '0 0 16px rgba(16,185,129,0.55), 0 2px 8px rgba(16,185,129,0.25)';
+                                            cardCursor = 'pointer';
+                                        } else if (isCandConflict) {
+                                            // 🚫 "불이 안 들어오는 거야" - 분리 규칙 충돌 대상 (딤드 + 금지)
+                                            bgColor = '#f8fafc';
+                                            borderColor = '#fca5a5';
+                                            borderStyle = 'dashed';
+                                            cardOpacity = 0.38;
+                                            cardCursor = 'not-allowed';
+                                        } else if (isSameClass) {
+                                            bgColor = '#ffffff';
+                                            borderColor = '#cbd5e1';
+                                            cardOpacity = 0.85;
+                                            cardCursor = 'pointer';
+                                        } else if (isInactive) {
+                                            bgColor = '#f8fafc';
+                                            borderColor = '#e2e8f0';
+                                            cardOpacity = 0.45;
+                                            cardCursor = 'not-allowed';
                                         }
                                     } else {
-                                        // 1학년 반 클릭 안 했을 때는 기존 로직
-                                        if (hasViolation) {
-                                            bgColor = '#ffebee';
-                                            borderColor = '#f44336';
-                                        } else if (isSearched) {
-                                            bgColor = '#c8e6c9';
-                                            borderColor = '#4CAF50';
-                                        } else if (isChanged) {
-                                            bgColor = '#fff9c4';
-                                            borderColor = '#fbc02d';
+                                        // 1학년 반 클릭 시
+                                        if (highlightedOldClass) {
+                                            if (isOvercrowded) {
+                                                bgColor = '#fef2f2';
+                                                borderColor = '#dc2626';
+                                                borderWidth = '2px';
+                                            } else if (isHighlighted) {
+                                                bgColor = '#eff6ff';
+                                                borderColor = '#3b82f6';
+                                                borderWidth = '2px';
+                                            } else {
+                                                bgColor = '#f8fafc';
+                                                borderColor = '#e2e8f0';
+                                                cardOpacity = 0.6;
+                                            }
+                                        } else {
+                                            if (hasViolation) {
+                                                bgColor = '#fff1f2';
+                                                borderColor = '#fecdd3';
+                                                borderWidth = '1.5px';
+                                            } else if (isSearched) {
+                                                bgColor = '#f0fdf4';
+                                                borderColor = '#86efac';
+                                                borderWidth = '2px';
+                                            } else if (isChanged) {
+                                                bgColor = '#fefce8';
+                                                borderColor = '#fde047';
+                                            }
                                         }
                                     }
-                                    
-                                    // 툴팁 텍스트 생성
+
+                                    // 툴팁 생성
                                     let tooltipText = '';
-                                    if (separationPartners.length > 0 && hasViolation && !highlightedOldClass) {
+                                    if (selectedStudent) {
+                                        if (isSelected) tooltipText = '현재 선택된 교체 출발 학생 (클릭 또는 Esc로 취소)';
+                                        else if (isCandEligible) tooltipText = `클릭하면 ${selectedStudent.성명} 학생과 즉시 맞교체됩니다 (성적 차이: ${candInfo.scoreDiff}점)`;
+                                        else if (isCandConflict) tooltipText = `🚫 [교체 불가] ${candInfo.conflictReason}`;
+                                        else if (isSameClass) tooltipText = '클릭하면 교체 출발 학생을 이 학생으로 변경합니다';
+                                        else if (isInactive) tooltipText = '성적 순위 차이가 커서 교체 대상이 아닙니다';
+                                    } else if (separationPartners.length > 0 && hasViolation && !highlightedOldClass) {
                                         const names = separationPartners.map(p => p.성명).join(', ');
                                         tooltipText = `⚠️ ${names}과(와) 분리 필요`;
                                     }
-                                    
+
                                     return (
                                         <div
                                             key={student.id}
@@ -2961,16 +3475,10 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
                                                 e.dataTransfer.effectAllowed = 'move';
                                                 e.dataTransfer.setData('studentId', student.id);
                                                 e.dataTransfer.setData('fromClass', student.현재분반);
-                                                e.currentTarget.style.opacity = '0.2'; // 매우 투명
-                                                e.currentTarget.style.boxShadow = '0 0 30px 10px rgba(255, 193, 7, 1)'; // 강한 노란 글로우
-                                                e.currentTarget.style.borderColor = '#FFC107';
-                                                e.currentTarget.style.borderWidth = '4px';
+                                                e.currentTarget.style.opacity = '0.3';
                                             }}
                                             onDragEnd={(e) => {
-                                                e.currentTarget.style.opacity = '1';
-                                                e.currentTarget.style.boxShadow = '';
-                                                e.currentTarget.style.borderColor = borderColor;
-                                                e.currentTarget.style.borderWidth = '2px';
+                                                e.currentTarget.style.opacity = cardOpacity;
                                             }}
                                             onDragOver={(e) => {
                                                 e.preventDefault();
@@ -2980,47 +3488,22 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
                                                 e.preventDefault();
                                                 const draggedId = e.dataTransfer.getData('studentId');
                                                 if (draggedId && draggedId !== student.id) {
-                                                    // 🔥 극적인 시각 효과!
-                                                    e.currentTarget.style.background = 'linear-gradient(135deg, #00E676 0%, #00C853 100%)'; // 그라디언트 네온 초록
-                                                    e.currentTarget.style.borderColor = '#FFD600'; // 노란 테두리
-                                                    e.currentTarget.style.borderWidth = '8px'; // 매우 굵게
-                                                    e.currentTarget.style.transform = 'scale(1.25) rotate(2deg)'; // 크게 + 약간 회전
-                                                    e.currentTarget.style.boxShadow = '0 0 40px 15px rgba(255, 214, 0, 1), 0 0 80px 30px rgba(0, 230, 118, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.5)'; // 3중 글로우 + 내부 빛
-                                                    e.currentTarget.style.color = '#FFFFFF'; // 흰색 텍스트
-                                                    e.currentTarget.style.fontWeight = '900'; // 매우 굵게
-                                                    e.currentTarget.style.fontSize = '15px'; // 크게
-                                                    e.currentTarget.style.textShadow = '0 0 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 214, 0, 0.8)'; // 텍스트 그림자
-                                                    e.currentTarget.style.zIndex = '1000';
-                                                    e.currentTarget.style.transition = 'all 0.1s ease-out'; // 빠른 애니메이션
+                                                    e.currentTarget.style.background = '#dcfce7';
+                                                    e.currentTarget.style.borderColor = '#16a34a';
+                                                    e.currentTarget.style.boxShadow = '0 0 16px rgba(22, 163, 74, 0.4)';
                                                 }
                                             }}
                                             onDragLeave={(e) => {
                                                 e.currentTarget.style.background = bgColor;
                                                 e.currentTarget.style.borderColor = borderColor;
-                                                e.currentTarget.style.borderWidth = '2px';
-                                                e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
-                                                e.currentTarget.style.boxShadow = (isHighlighted || (isSearched && !highlightedOldClass)) ? '0 0 10px rgba(255, 152, 0, 0.5)' : 'none';
-                                                e.currentTarget.style.color = '';
-                                                e.currentTarget.style.fontWeight = (isSearched && !highlightedOldClass) ? 'bold' : 'normal';
-                                                e.currentTarget.style.fontSize = '13px';
-                                                e.currentTarget.style.textShadow = 'none';
-                                                e.currentTarget.style.zIndex = '';
+                                                e.currentTarget.style.boxShadow = cardBoxShadow;
                                             }}
                                             onDrop={(e) => {
                                                 e.preventDefault();
                                                 e.stopPropagation();
-                                                
                                                 e.currentTarget.style.background = bgColor;
                                                 e.currentTarget.style.borderColor = borderColor;
-                                                e.currentTarget.style.borderWidth = '2px';
-                                                e.currentTarget.style.transform = 'scale(1) rotate(0deg)';
-                                                e.currentTarget.style.boxShadow = (isHighlighted || (isSearched && !highlightedOldClass)) ? '0 0 10px rgba(255, 152, 0, 0.5)' : 'none';
-                                                e.currentTarget.style.color = '';
-                                                e.currentTarget.style.fontWeight = (isSearched && !highlightedOldClass) ? 'bold' : 'normal';
-                                                e.currentTarget.style.fontSize = '13px';
-                                                e.currentTarget.style.textShadow = 'none';
-                                                e.currentTarget.style.zIndex = '';
-                                                
+                                                e.currentTarget.style.boxShadow = cardBoxShadow;
                                                 const draggedId = e.dataTransfer.getData('studentId');
                                                 if (draggedId && draggedId !== student.id) {
                                                     handleCardSwap(draggedId, student.id);
@@ -3030,55 +3513,81 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
                                             title={tooltipText}
                                             style={{
                                                 padding: '8px 10px',
-                                                margin: '4px 0',
+                                                margin: '5px 0',
                                                 background: bgColor,
-                                                border: `2px solid ${borderColor}`,
-                                                borderRadius: '6px',
-                                                cursor: 'move',
+                                                border: `${borderWidth} ${borderStyle} ${borderColor}`,
+                                                borderRadius: '8px',
+                                                cursor: cardCursor,
                                                 fontSize: '13px',
-                                                transition: 'all 0.2s',
-                                                boxShadow: (isHighlighted || (isSearched && !highlightedOldClass)) ? '0 0 10px rgba(255, 152, 0, 0.5)' : 'none',
-                                                fontWeight: (isSearched && !highlightedOldClass) ? 'bold' : 'normal',
+                                                transition: 'all 0.15s ease',
+                                                boxShadow: cardBoxShadow,
+                                                opacity: cardOpacity,
                                                 position: 'relative'
                                             }}
                                             onMouseEnter={(e) => {
-                                                if (!e.currentTarget.getAttribute('draggable')) return;
-                                                e.currentTarget.style.background = '#e3f2fd';
-                                                e.currentTarget.style.borderColor = '#2196F3';
+                                                if (selectedStudent) {
+                                                    if (isCandEligible) {
+                                                        e.currentTarget.style.transform = 'translateY(-1px) scale(1.01)';
+                                                    }
+                                                    return;
+                                                }
+                                                e.currentTarget.style.background = '#f1f5f9';
                                             }}
                                             onMouseLeave={(e) => {
+                                                if (selectedStudent) {
+                                                    if (isCandEligible) {
+                                                        e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                                                    }
+                                                    return;
+                                                }
                                                 e.currentTarget.style.background = bgColor;
-                                                e.currentTarget.style.borderColor = borderColor;
                                             }}
                                         >
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px' }}>
                                                 <span>
-                                                    {idx + 1}. {student.성별 === '남' && <span style={{ color: '#1976d2', marginRight: '2px' }}>●</span>}{student.성별 === '여' && <span style={{ color: '#e53935', marginRight: '2px' }}>●</span>}
-                                                    <span style={{ fontWeight: '600' }}>{student.학번}</span> {student.성명} <span style={{ fontSize: '11px', color: '#64748b' }}>({student.기준성적})</span>
+                                                    <span style={{ color: '#94a3b8', fontSize: '11.5px', marginRight: '4px' }}>{idx + 1}.</span>
+                                                    {student.성별 === '남' && <span style={{ color: '#2563eb', marginRight: '3px' }}>●</span>}
+                                                    {student.성별 === '여' && <span style={{ color: '#e11d48', marginRight: '3px' }}>●</span>}
+                                                    <span style={{ fontWeight: '700' }}>{student.학번}</span> {student.성명}{' '}
+                                                    <span style={{ fontSize: '11px', color: '#64748b' }}>({student.기준성적})</span>
                                                 </span>
-                                                <span>
-                                                    {isChanged && !highlightedOldClass && ' ✏️'}
-                                                    {hasViolation && !highlightedOldClass && ' ⚠️'}
-                                                    {isSearched && !highlightedOldClass && ' 🔍'}
-                                                </span>
+                                                <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                                                    {isSelected && (
+                                                        <span style={{ fontSize: '10.5px', background: '#2563eb', color: 'white', padding: '1px 6px', borderRadius: '4px', fontWeight: '800' }}>
+                                                            선택됨
+                                                        </span>
+                                                    )}
+                                                    {isCandEligible && (
+                                                        <span style={{ fontSize: '10.5px', background: '#10b981', color: 'white', padding: '1px 6px', borderRadius: '4px', fontWeight: '800' }}>
+                                                            🔄 교체가능
+                                                        </span>
+                                                    )}
+                                                    {isCandConflict && (
+                                                        <span style={{ fontSize: '10.5px', background: '#fee2e2', color: '#dc2626', padding: '1px 6px', borderRadius: '4px', fontWeight: '800' }}>
+                                                            🚫 분리충돌
+                                                        </span>
+                                                    )}
+                                                    {!selectedStudent && isChanged && !highlightedOldClass && <span>✏️</span>}
+                                                    {!selectedStudent && hasViolation && !highlightedOldClass && <span>⚠️</span>}
+                                                    {!selectedStudent && isSearched && !highlightedOldClass && <span>🔍</span>}
+                                                </div>
                                             </div>
-                                            {hasViolation && !highlightedOldClass && separationPartners.length > 0 && (
+                                            {hasViolation && !highlightedOldClass && separationPartners.length > 0 && !selectedStudent && (
                                                 <div style={{
                                                     marginTop: '5px',
-                                                    padding: '4px 8px',
+                                                    padding: '3px 7px',
                                                     background: '#fff1f2',
                                                     border: '1px solid #fecdd3',
-                                                    borderRadius: '6px',
+                                                    borderRadius: '5px',
                                                     fontSize: '11px',
                                                     color: '#be123c',
                                                     fontWeight: '600',
                                                     display: 'flex',
                                                     alignItems: 'center',
-                                                    gap: '4px',
-                                                    boxShadow: '0 1px 3px rgba(190, 18, 60, 0.08)'
+                                                    gap: '4px'
                                                 }}>
                                                     <span>⚠️</span>
-                                                    <span><strong>{separationPartners.map(p => p.성명).join(', ')}</strong>과(와) 분리 대상입니다</span>
+                                                    <span><strong>{separationPartners.map(p => p.성명).join(', ')}</strong> 분리 대상</span>
                                                 </div>
                                             )}
                                         </div>
@@ -3090,131 +3599,37 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
                 })}
             </div>
             
-            {showModal && selectedStudent && (
-                <div onClick={() => setShowModal(false)} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-                    <div onClick={(e) => e.stopPropagation()} style={{ background: 'white', padding: '20px', borderRadius: '10px', maxWidth: '600px', maxHeight: '80vh', overflow: 'auto', width: '90%' }}>
-                        <div style={{ marginBottom: '15px', paddingBottom: '10px', borderBottom: '2px solid #eee' }}>
-                            <h2 style={{ margin: 0 }}>{selectedStudent.학번}{selectedStudent.성명} 교체 추천</h2>
-                            <p style={{ margin: '5px 0 0 0', color: '#666' }}>현재 반: {selectedStudent.현재분반}반 | 성적: {selectedStudent.기준성적}</p>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                            {getRecommendations(selectedStudent).map((rec, idx) => {
-                                // 위쪽 학생들과 아래쪽 학생들 사이에 현재 학생 표시
-                                const items = [];
-                                
-                                if (idx === 0 && rec.position > 0) {
-                                    // 첫 번째가 아래쪽이면 위에 현재 학생 표시
-                                    items.push(
-                                        <div
-                                            key="current"
-                                            style={{
-                                                padding: '12px',
-                                                border: '3px solid #2196F3',
-                                                borderRadius: '5px',
-                                                background: '#e3f2fd',
-                                                textAlign: 'center',
-                                                fontWeight: 'bold',
-                                                color: '#1976d2'
-                                            }}
-                                        >
-                                            👉 {selectedStudent.학번}{selectedStudent.성명} ({selectedStudent.현재분반}반) - 현재 선택
-                                        </div>
-                                    );
-                                }
-                                
-                                items.push(
-                                    <div
-                                        key={idx}
-                                        onClick={() => swapStudents(selectedStudent, rec.student)}
-                                        style={{
-                                            padding: '12px',
-                                            border: '1px solid #ddd',
-                                            borderRadius: '5px',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            transition: 'all 0.2s',
-                                            background: rec.position < 0 ? '#f5f5f5' : 'white'
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = '#e3f2fd';
-                                            e.currentTarget.style.borderColor = '#2196F3';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = rec.position < 0 ? '#f5f5f5' : 'white';
-                                            e.currentTarget.style.borderColor = '#ddd';
-                                        }}
-                                    >
-                                        <div style={{ flex: 1 }}>
-                                            <div>
-                                                {rec.position < 0 ? '⬆️' : '⬇️'} <strong>{rec.student.학번}{rec.student.성명}</strong> ({rec.student.현재분반}반)
-                                            </div>
-                                            <div style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-                                                성적: {rec.student.기준성적} | 차이: {rec.scoreDiff.toFixed(1)}점 | {Math.abs(rec.position)}칸 {rec.position < 0 ? '위' : '아래'}
-                                            </div>
-                                        </div>
-                                        <button style={{ padding: '8px 15px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer', fontWeight: 'bold' }}>교체</button>
-                                    </div>
-                                );
-                                
-                                // 위쪽 마지막과 아래쪽 첫번째 사이에 현재 학생 표시
-                                if (rec.position < 0 && idx < getRecommendations(selectedStudent).length - 1 && getRecommendations(selectedStudent)[idx + 1].position > 0) {
-                                    items.push(
-                                        <div
-                                            key="current"
-                                            style={{
-                                                padding: '12px',
-                                                border: '3px solid #2196F3',
-                                                borderRadius: '5px',
-                                                background: '#e3f2fd',
-                                                textAlign: 'center',
-                                                fontWeight: 'bold',
-                                                color: '#1976d2'
-                                            }}
-                                        >
-                                            👉 {selectedStudent.학번}{selectedStudent.성명} ({selectedStudent.현재분반}반) - 현재 선택
-                                        </div>
-                                    );
-                                }
-                                
-                                return items;
-                            })}
-                        </div>
-                        <button onClick={() => setShowModal(false)} style={{ marginTop: '15px', width: '100%', padding: '10px', background: '#2196F3', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer', fontWeight: 'bold' }}>
-                            닫기
-                        </button>
-                    </div>
-                </div>
-            )}
-            
+            {/* 변경된 학생 목록 */}
             {Object.keys(classes).length > 0 && (() => {
                 const changedStudents = getChangedStudents();
                 return changedStudents.length > 0 ? (
-                    <div style={{ marginTop: '30px', padding: '20px', background: '#fff3e0', borderRadius: '10px', border: '2px solid #ff9800' }}>
-                        <h3 style={{ marginBottom: '15px', color: '#e65100' }}>
-                            📝 배치가 변경된 학생 ({changedStudents.length}명)
+                    <div style={{ marginTop: '24px', padding: '16px 20px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+                        <h3 style={{ margin: '0 0 12px 0', color: '#0f172a', fontSize: '15px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>📝 배치가 변경된 학생</span>
+                            <span style={{ fontSize: '12.5px', background: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '999px' }}>
+                                {changedStudents.length}명
+                            </span>
                         </h3>
-                        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                        <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '8px' }}>
                             {changedStudents.map((student, idx) => (
                                 <div 
                                     key={student.학번}
                                     style={{ 
-                                        padding: '12px', 
-                                        marginBottom: '8px', 
-                                        background: 'white', 
-                                        borderRadius: '5px',
-                                        border: '1px solid #ffb74d',
-                                        fontSize: '14px',
+                                        padding: '8px 12px', 
+                                        background: '#f8fafc', 
+                                        borderRadius: '8px',
+                                        border: '1px solid #e2e8f0',
+                                        fontSize: '13px',
                                         display: 'flex',
                                         justifyContent: 'space-between',
                                         alignItems: 'center'
                                     }}
                                 >
                                     <div>
-                                        <strong>{idx + 1}.</strong> {student.학번}{student.성명}
+                                        <span style={{ color: '#94a3b8', fontSize: '11px', marginRight: '4px' }}>{idx + 1}.</span>
+                                        <strong>{student.학번} {student.성명}</strong>
                                     </div>
-                                    <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#f57c00' }}>
+                                    <div style={{ fontSize: '12.5px', fontWeight: '800', color: '#4f46e5' }}>
                                         {student.원래반}반 → {student.현재반}반
                                     </div>
                                 </div>
@@ -3224,7 +3639,20 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
                 ) : null;
             })()}
             
-            {/* 🧪 전수 검증 모달 */}
+            {/* 🚫 분리 대상 학생 관리 모달 */}
+            {showSeparationModal && (
+                <SeparationModal
+                    onClose={() => setShowSeparationModal(false)}
+                    separations={separations}
+                    setSeparations={setSeparations}
+                    handleSeparationFile={handleSeparationFile}
+                    updateSeparation={updateSeparation}
+                    removeSeparation={removeSeparation}
+                    addSeparation={addSeparation}
+                />
+            )}
+
+            {/* 🧪 다른 조건으로 테스트하기 모달 (시뮬레이터) */}
             {showDiagnostics && (
                 <DiagnosticModal
                     onClose={() => setShowDiagnostics(false)}
