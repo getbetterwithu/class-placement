@@ -16,3 +16,9 @@ _archive/\[하드코딩\]*.html
 .DS_Store
 **/.DS_Store
 Thumbs.db
+__pycache__/
+*.pyc
+preview.html
+preview_fonts.html
+preview/
+tools/upgrade_app.py
