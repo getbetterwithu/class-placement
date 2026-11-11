@@ -68,6 +68,10 @@
     - 교사 관점의 언어로 직관적 변경 (108가지 분반 환경 시뮬레이터)
 14. **세련된 모던 Slate/Indigo SaaS 디자인 리팩토링**:
     - 눈부신 네온 무지개 버튼과 촌스러운 주황색 분산 박스를 깔끔하고 정돈된 프리미엄 SaaS 룩앤필로 전면 교체
+15. **빈 화면(Blank Screen) 런타임 오류 해결 및 빌드 자동 검증기 구축**:
+    - `src/app.jsx` 상단 React 훅 디스트럭처링에 `useMemo`, `useRef`가 누락되어 발생한 `ReferenceError: useMemo is not defined` 수정 완료
+    - JSDOM 기반 실 브라우저 DOM 렌더링 검증 스크립트(`tools/test_runtime.js`) 구축 (201,796 bytes 렌더링 확인)
+    - `tools/build.py` 빌드 파이프라인에 구문 검증 + 런타임 렌더링 검증 2중 잠금 적용
 
 ---
 

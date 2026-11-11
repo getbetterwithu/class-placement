@@ -39,3 +39,11 @@ ret = subprocess.run(['node', os.path.join(base_dir, 'tools/test_compile.js')])
 if ret.returncode != 0:
     raise SystemExit("❌ Babel 컴파일 검증 실패! index.html 빌드가 중단되었습니다.")
 
+# 런타임 렌더링 무결성 검증 (jsdom 있는 경우)
+runtime_test = os.path.join(base_dir, 'tools/test_runtime.js')
+if os.path.exists(runtime_test):
+    ret_rt = subprocess.run(['node', runtime_test])
+    if ret_rt.returncode != 0:
+        raise SystemExit("❌ 런타임 렌더링 검증 실패! 빈 화면 버그 발생 위험으로 빌드가 중단되었습니다.")
+
+

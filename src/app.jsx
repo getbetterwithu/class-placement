@@ -1,4 +1,4 @@
-const { useState, useEffect } = React;        
+const { useState, useEffect, useMemo, useRef } = React;        
         // 폭탄돌리기 이미지 (base64 embedded)
         
 

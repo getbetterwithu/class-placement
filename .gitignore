@@ -22,3 +22,5 @@ preview.html
 preview_fonts.html
 preview/
 tools/upgrade_app.py
+node_modules/
+
