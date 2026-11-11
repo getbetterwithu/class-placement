@@ -1,10 +1,13 @@
 const fs = require('fs');
 const vm = require('vm');
 
-const preamble = fs.readFileSync('C:/Workspace/class-placement/tools/preamble.html', 'utf8');
-const assets = fs.readFileSync('C:/Workspace/class-placement/src/assets.js', 'utf8');
-const sample = fs.readFileSync('C:/Workspace/class-placement/src/sample_data.js', 'utf8');
-const app = fs.readFileSync('C:/Workspace/class-placement/src/app.jsx', 'utf8');
+const path = require('path');
+const baseDir = path.resolve(__dirname, '..');
+
+const preamble = fs.readFileSync(path.join(baseDir, 'tools/preamble.html'), 'utf8');
+const assets = fs.readFileSync(path.join(baseDir, 'src/assets.js'), 'utf8');
+const sample = fs.readFileSync(path.join(baseDir, 'src/sample_data.js'), 'utf8');
+const app = fs.readFileSync(path.join(baseDir, 'src/app.jsx'), 'utf8');
 
 // Extract Babel script (script index 2)
 const scripts = [];

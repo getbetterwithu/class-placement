@@ -360,6 +360,7 @@ function ClassAssignmentApp() {
     const [isDraggingResume, setIsDraggingResume] = useState(false); // 드래그앤드롭 강조 상태 (이어하기)
     const [importPreview, setImportPreview] = useState(null); // 업로드 미리보기 모달: 자릿수+컬럼매핑 확인
     const [separationOpen, setSeparationOpen] = useState(true); // 분리 학생 목록 펼침/접힘
+    const [showSettings, setShowSettings] = useState(false); // 시작화면 환경설정 접힘/펼침 토글
 
     // ─────────────────────────────────────────────────────────────
     // 자동 저장/복원: 작업 내용을 브라우저에 자동 보관해 새로고침해도 살아남게 한다.
@@ -1967,57 +1968,100 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
                         </div>
                     );
                 })()}
-                {/* 상단 헤더 카드 - 2열 레이아웃 */}
+                {/* 상단 헤더 카드 */}
                 <div style={{ 
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    borderRadius: '20px',
-                    padding: '30px',
-                    marginBottom: '40px',
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+                    background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #9333ea 100%)',
+                    borderRadius: '24px',
+                    padding: '36px 32px 30px',
+                    marginBottom: '32px',
+                    boxShadow: '0 20px 50px rgba(79, 70, 229, 0.25)'
                 }}>
-                    {/* 제목 */}
+                    {/* 메인 타이틀 (중·고등학교 공용) */}
                     <h1 style={{
-                        margin: '0 0 12px 0',
+                        margin: '0 0 10px 0',
                         color: 'white',
-                        fontSize: '48px',
+                        fontSize: '44px',
                         fontFamily: "'Wanted Sans Variable', 'Wanted Sans', 'Pretendard Variable', Pretendard, sans-serif",
                         fontWeight: '800',
                         textAlign: 'center',
-                        letterSpacing: '-1.5px',
-                        textShadow: '0 4px 16px rgba(0,0,0,0.25)'
+                        letterSpacing: '-1px',
+                        textShadow: '0 4px 16px rgba(0,0,0,0.3)'
                     }}>
-                        🔥 {schoolType === 'high' ? '고등학교' : '중학교'} 분반 배치 시스템
+                        🔥 중·고등학교 분반 배치 시스템
                     </h1>
                     <h2 style={{
-                        margin: '0 0 30px 0',
-                        color: '#ffe066',
-                        fontSize: '20px',
+                        margin: '0 0 28px 0',
+                        color: '#fef08a',
+                        fontSize: '19px',
                         fontFamily: "'Pretendard Variable', Pretendard, sans-serif",
                         fontWeight: '600',
                         textAlign: 'center',
-                        letterSpacing: '-0.5px',
+                        letterSpacing: '-0.3px',
                         textShadow: '0 2px 8px rgba(0,0,0,0.25)'
                     }}>
-                        💣 폭탄돌리기 방지 · 중·고등학교 맞춤형 데이터 기반 학급 편성
+                        💣 폭탄 돌리기 방지 · 어느 한 반도 독박 쓰지 않는 공평한 학급 편성
                     </h2>
-                    
-                    {/* ── 메인: 이미지 + 새 작업 시작 (좌우 2열) ── */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', alignItems: 'center' }}>
-                        {/* 왼쪽: 폭탄돌리기 이미지 (크게, 가운데) */}
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            <img
-                                src={BOMB_IMAGE}
-                                alt="폭탄돌리기 게임"
-                                style={{
-                                    width: '100%', maxWidth: '520px',
-                                    borderRadius: '18px',
-                                    boxShadow: '0 12px 30px rgba(0,0,0,0.35)',
-                                    border: '5px solid #ff6b6b'
-                                }}
-                            />
+
+                    {/* 교사 눈높이 3대 안심 가치 카드 */}
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                        gap: '14px',
+                        marginBottom: '26px'
+                    }}>
+                        <div style={{
+                            background: 'rgba(255, 255, 255, 0.96)',
+                            borderRadius: '16px',
+                            padding: '16px 20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '14px',
+                            boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
+                        }}>
+                            <div style={{ fontSize: '28px', flexShrink: 0 }}>🔒</div>
+                            <div>
+                                <div style={{ fontSize: '15px', fontWeight: '800', color: '#1e293b', marginBottom: '3px' }}>교무실 나이스 PC 안심</div>
+                                <div style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.4' }}>인터넷 연결 없이도 100% 동작! 학생 명단이 외부로 절대 나가지 않아요</div>
+                            </div>
                         </div>
 
-                        {/* 오른쪽: 새 작업 시작 (메인) */}
+                        <div style={{
+                            background: 'rgba(255, 255, 255, 0.96)',
+                            borderRadius: '16px',
+                            padding: '16px 20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '14px',
+                            boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
+                        }}>
+                            <div style={{ fontSize: '28px', flexShrink: 0 }}>⚖️</div>
+                            <div>
+                                <div style={{ fontSize: '15px', fontWeight: '800', color: '#1e293b', marginBottom: '3px' }}>성적·성비·요주의 학생 균등</div>
+                                <div style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.4' }}>누구 하나 독박 쓰지 않도록, 사이좋게 공평하게 섞어드립니다</div>
+                            </div>
+                        </div>
+
+                        <div style={{
+                            background: 'rgba(255, 255, 255, 0.96)',
+                            borderRadius: '16px',
+                            padding: '16px 20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '14px',
+                            boxShadow: '0 4px 14px rgba(0,0,0,0.08)'
+                        }}>
+                            <div style={{ fontSize: '28px', flexShrink: 0 }}>⚡</div>
+                            <div>
+                                <div style={{ fontSize: '15px', fontWeight: '800', color: '#1e293b', marginBottom: '3px' }}>엑셀만 넣으면 1초 완성</div>
+                                <div style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.4' }}>가입도 설치도 없이 바로 클릭 한 번으로 끝내세요 (샘플 194명 내장)</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* ── 메인 2열 그리드: 좌측 메인 작업 영역(확대) + 우측 위트 배너 카드(축소) ── */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.75fr 1fr', gap: '26px', alignItems: 'start' }}>
+                        
+                        {/* 왼쪽: 메인 작업 시작 (큼직한 폰트 & 시원한 액션) */}
                         <div
                             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
                             onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
@@ -2027,254 +2071,356 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
                                 processStudentFile(e.dataTransfer.files[0]);
                             }}
                             style={{
-                                background: 'white', padding: '32px 28px', borderRadius: '18px',
-                                boxShadow: '0 8px 24px rgba(0,0,0,0.25)', textAlign: 'center',
-                                border: isDragging ? '3px dashed #1976d2' : '3px dashed transparent',
-                                transition: 'all 0.2s'
+                                background: 'white',
+                                padding: '36px 32px',
+                                borderRadius: '20px',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.22)',
+                                border: isDragging ? '3px dashed #4f46e5' : '3px dashed transparent',
+                                transition: 'all 0.2s',
+                                textAlign: 'left'
                             }}
                         >
-                            <div style={{ fontSize: '30px', fontWeight: '800', color: '#1976d2', marginBottom: '6px' }}>
-                                🆕 새 작업 시작!
+                            <div style={{ fontSize: '26px', fontWeight: '800', color: '#1e293b', marginBottom: '6px' }}>
+                                🚀 시작하기
                             </div>
-                            <p style={{ fontSize: '14px', color: '#666', marginBottom: '14px' }}>
-                                우리 학교 환경을 선택하고 엑셀 파일을 올려주세요.
+                            <p style={{ fontSize: '15.5px', color: '#64748b', marginBottom: '22px', lineHeight: '1.5' }}>
+                                설치나 회원가입 없이, 샘플 명단으로 바로 둘러보거나 우리 학교 엑셀 명단을 올려주세요.
                             </p>
 
-                            {/* ── 우리 학교 맞춤 환경 프리셋 선택 ── */}
-                            <div style={{
-                                background: '#f8fafc',
-                                border: '1.5px solid #e2e8f0',
-                                borderRadius: '14px',
-                                padding: '14px 16px',
-                                marginBottom: '16px',
-                                textAlign: 'left'
-                            }}>
-                                <div style={{ fontSize: '14px', fontWeight: '800', color: '#1e293b', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <span>⚙️ 우리 학교 환경 맞춤 설정</span>
-                                    <span style={{ fontSize: '11px', fontWeight: '500', color: '#64748b' }}>(언제든 변경 가능)</span>
-                                </div>
+                            {/* 1순위: 샘플 체험 버튼 (글자 18px 큼직) */}
+                            <button
+                                onClick={() => loadSampleDemo({ schoolType, genderMode, idFormat, gradeTransition })}
+                                style={{
+                                    width: '100%',
+                                    padding: '17px 24px',
+                                    background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '14px',
+                                    fontWeight: '800',
+                                    fontSize: '18px',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 6px 20px rgba(124, 58, 237, 0.35)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '10px',
+                                    marginBottom: '14px',
+                                    transition: 'transform 0.15s, box-shadow 0.15s'
+                                }}
+                            >
+                                <span>✨ 194명 실제 샘플로 1초 만에 바로 체험하기 (클릭)</span>
+                            </button>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {/* 1. 학교급 */}
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569' }}>1. 학교급:</span>
-                                        <div style={{ display: 'flex', gap: '5px' }}>
-                                            {[
-                                                { id: 'middle', label: '중학교' },
-                                                { id: 'high', label: '고등학교' }
-                                            ].map(item => (
-                                                <button
-                                                    key={item.id}
-                                                    type="button"
-                                                    onClick={() => setSchoolType(item.id)}
-                                                    style={{
-                                                        padding: '5px 12px', borderRadius: '7px', fontSize: '12px', fontWeight: '700', cursor: 'pointer',
-                                                        border: schoolType === item.id ? '2px solid #3b82f6' : '1px solid #cbd5e1',
-                                                        background: schoolType === item.id ? '#eff6ff' : '#fff',
-                                                        color: schoolType === item.id ? '#1d4ed8' : '#64748b'
-                                                    }}
-                                                >{item.label}</button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* 2. 성별 유형 */}
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569' }}>2. 성별 구성:</span>
-                                        <div style={{ display: 'flex', gap: '5px' }}>
-                                            {[
-                                                { id: 'coed', label: '남녀공학' },
-                                                { id: 'boys', label: '남학교' },
-                                                { id: 'girls', label: '여학교' }
-                                            ].map(item => (
-                                                <button
-                                                    key={item.id}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setGenderMode(item.id);
-                                                        setBalanceGender(item.id === 'coed');
-                                                    }}
-                                                    style={{
-                                                        padding: '5px 10px', borderRadius: '7px', fontSize: '12px', fontWeight: '700', cursor: 'pointer',
-                                                        border: genderMode === item.id ? '2px solid #10b981' : '1px solid #cbd5e1',
-                                                        background: genderMode === item.id ? '#ecfdf5' : '#fff',
-                                                        color: genderMode === item.id ? '#047857' : '#64748b'
-                                                    }}
-                                                >{item.label}</button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* 3. 학번 체계 */}
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569' }}>3. 학번 자릿수:</span>
-                                        <div style={{ display: 'flex', gap: '5px' }}>
-                                            {[
-                                                { id: 'auto', label: '자동감지' },
-                                                { id: '4digit', label: '4자리(2101)' },
-                                                { id: '5digit', label: '5자리(20101)' }
-                                            ].map(item => (
-                                                <button
-                                                    key={item.id}
-                                                    type="button"
-                                                    onClick={() => setIdFormat(item.id)}
-                                                    style={{
-                                                        padding: '5px 9px', borderRadius: '7px', fontSize: '11.5px', fontWeight: '700', cursor: 'pointer',
-                                                        border: idFormat === item.id ? '2px solid #f59e0b' : '1px solid #cbd5e1',
-                                                        background: idFormat === item.id ? '#fffbeb' : '#fff',
-                                                        color: idFormat === item.id ? '#b45309' : '#64748b'
-                                                    }}
-                                                >{item.label}</button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* 4. 대상 학년 */}
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569' }}>4. 분반 대상:</span>
-                                        <div style={{ display: 'flex', gap: '5px' }}>
-                                            {[
-                                                { id: '1to2', label: schoolType === 'high' ? '고1→고2' : '1→2학년' },
-                                                { id: '2to3', label: schoolType === 'high' ? '고2→고3' : '2→3학년' },
-                                                { id: 'freshman', label: '신입생' }
-                                            ].map(item => (
-                                                <button
-                                                    key={item.id}
-                                                    type="button"
-                                                    onClick={() => setGradeTransition(item.id)}
-                                                    style={{
-                                                        padding: '5px 8px', borderRadius: '7px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
-                                                        border: (gradeTransition || '1to2') === item.id ? '2px solid #8b5cf6' : '1px solid #cbd5e1',
-                                                        background: (gradeTransition || '1to2') === item.id ? '#f5f3ff' : '#fff',
-                                                        color: (gradeTransition || '1to2') === item.id ? '#6d28d9' : '#64748b'
-                                                    }}
-                                                >{item.label}</button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* 1초 체험 & 샘플 양식 다운로드 액션 바 */}
-                            <div style={{
-                                display: 'flex', flexDirection: 'column', gap: '8px',
-                                marginBottom: '14px', padding: '12px 14px',
-                                background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)',
-                                borderRadius: '12px', border: '1px solid #ddd6fe'
-                            }}>
-                                <button
-                                    onClick={() => loadSampleDemo({ schoolType, genderMode, idFormat, gradeTransition })}
-                                    style={{
-                                        padding: '12px 20px',
-                                        background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
-                                        color: 'white', border: 'none', borderRadius: '10px',
-                                        fontWeight: '800', fontSize: '15px', cursor: 'pointer',
-                                        boxShadow: '0 4px 12px rgba(124, 58, 237, 0.35)',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
-                                    }}
-                                >
-                                    <span>✨ 선택한 설정으로 1초 만에 바로 체험하기 (클릭)</span>
-                                </button>
-                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                    <a href="학생데이터_샘플.xlsx" download style={{ fontSize: '12px', color: '#6d28d9', fontWeight: '700', textDecoration: 'underline' }}>
-                                        📥 학생데이터 샘플 양식 받기
-                                    </a>
-                                    <span style={{ color: '#c4b5fd' }}>·</span>
-                                    <a href="분리대상_샘플.xlsx" download style={{ fontSize: '12px', color: '#6d28d9', fontWeight: '700', textDecoration: 'underline' }}>
-                                        📥 분리대상 샘플 양식 받기
-                                    </a>
-                                </div>
-                            </div>
-
-                            {/* 🧪 전수 검사기 실행 버튼 */}
-                            <div style={{ marginBottom: '18px' }}>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowDiagnostics(true)}
-                                    style={{
-                                        width: '100%', padding: '11px 16px',
-                                        background: 'linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%)',
-                                        border: '1.5px solid #a855f7',
-                                        borderRadius: '10px',
-                                        color: '#6b21a8',
-                                        fontSize: '13.5px',
-                                        fontWeight: '800',
-                                        cursor: 'pointer',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: '6px',
-                                        boxShadow: '0 2px 6px rgba(168,85,247,0.15)'
-                                    }}
-                                >
-                                    <span>🧪 108개 분반 환경 전수 검사기 (성비·성적·학번 매트릭스)</span>
-                                </button>
-                            </div>
+                            {/* 2순위: 엑셀 파일 업로드 버튼 */}
                             <label style={{
-                                display: 'inline-block', padding: '16px 36px',
-                                background: 'linear-gradient(135deg, #4CAF50 0%, #2e9e4f 100%)',
-                                color: 'white', borderRadius: '12px', cursor: 'pointer',
-                                fontWeight: '800', fontSize: '19px',
-                                boxShadow: '0 4px 14px rgba(76, 175, 80, 0.45)'
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '100%',
+                                padding: '18px 24px',
+                                boxSizing: 'border-box',
+                                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                color: 'white',
+                                borderRadius: '14px',
+                                cursor: 'pointer',
+                                fontWeight: '800',
+                                fontSize: '19px',
+                                boxShadow: '0 6px 20px rgba(16, 185, 129, 0.35)',
+                                gap: '10px',
+                                marginBottom: '8px'
                             }}>
-                                📁 학생 데이터 업로드 (CSV/Excel)
+                                📁 우리 학교 학생 명단 올리기 (CSV / Excel)
                                 <input type="file" accept=".xlsx,.xls,.csv"
                                     onChange={(e) => { handleStudentDataUpload(e); e.target.value = ''; }}
                                     style={{ display: 'none' }} />
                             </label>
-                            <p style={{ fontSize: '14px', color: isDragging ? '#1976d2' : '#999', marginTop: '14px', marginBottom: '0', fontWeight: '600' }}>
-                                📥 또는 여기로 파일을 끌어다 놓으세요
+                            <p style={{ textAlign: 'center', fontSize: '14px', color: isDragging ? '#4f46e5' : '#94a3b8', marginTop: '0', marginBottom: '20px', fontWeight: '600' }}>
+                                📥 또는 엑셀 파일을 여기로 끌어다 놓으셔도 돼요
                             </p>
-                            <div style={{ textAlign: 'center', marginTop: '20px', padding: '18px 20px', background: 'linear-gradient(135deg, #fff3c4 0%, #ffe0ec 100%)', borderRadius: '14px', border: '2px dashed #ffb347' }}>
-                                <div style={{ fontSize: '17px', fontWeight: '800', color: '#e8590c', marginBottom: '8px' }}>📋 파일에 꼭 있어야 할 것!</div>
-                                <div style={{ fontSize: '22px', fontWeight: '800', color: '#1971c2', letterSpacing: '0.5px' }}>
+
+                            {/* 파일 필수 4개 항목 친절 안내 */}
+                            <div style={{
+                                padding: '18px 22px',
+                                background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+                                borderRadius: '16px',
+                                border: '2px dashed #f59e0b',
+                                marginBottom: '20px'
+                            }}>
+                                <div style={{ fontSize: '16px', fontWeight: '800', color: '#b45309', marginBottom: '6px' }}>
+                                    📋 엑셀 파일에는 딱 4개만 있으면 돼요!
+                                </div>
+                                <div style={{ fontSize: '24px', fontWeight: '800', color: '#1e3a8a', letterSpacing: '0.5px', marginBottom: '8px' }}>
                                     반 · 번호 · 성명 · 기준성적
                                 </div>
-                                <div style={{ fontSize: '15px', color: '#7a5c00', marginTop: '10px', lineHeight: '1.6' }}>
-                                    ✨ 컬럼 이름이 조금 달라도 <strong>자동으로 척척 알아봐요!</strong><br/>
-                                    업로드 후 확인 화면에서 직접 맞출 수도 있어요 😊
+                                <div style={{ fontSize: '14px', color: '#78350f', lineHeight: '1.5' }}>
+                                    ✨ 열 이름이 '이름', '점수'처럼 조금 달라도 <strong>알아서 척척 알아봅니다!</strong> 업로드 후 확인 화면에서 직접 맞출 수도 있어요 😊
                                 </div>
                             </div>
-                            <div style={{ textAlign: 'center', marginTop: '14px', padding: '13px 18px', background: 'linear-gradient(135deg, #e7f5ff 0%, #d3f9d8 100%)', borderRadius: '14px', border: '2px solid #74c0fc' }}>
-                                <div style={{ fontSize: '15px', fontWeight: '800', color: '#1c7ed6', marginBottom: '4px' }}>🔒 자료는 내 컴퓨터 밖으로 나가지 않아요</div>
-                                <div style={{ fontSize: '13px', color: '#37618a', lineHeight: '1.6' }}>
-                                    서버에 올리지 않고 내 브라우저에서만 처리돼요. <strong>작업은 자동 저장되어 새로고침해도 그대로 이어집니다</strong> 👍
+
+                            {/* ── 우리 학교 맞춤 환경 (아코디언 형태: 평소엔 접어둠) ── */}
+                            <div style={{
+                                background: '#f8fafc',
+                                border: '1.5px solid #e2e8f0',
+                                borderRadius: '16px',
+                                overflow: 'hidden',
+                                marginBottom: '18px'
+                            }}>
+                                <div 
+                                    onClick={() => setShowSettings(!showSettings)}
+                                    style={{
+                                        padding: '15px 20px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        cursor: 'pointer',
+                                        userSelect: 'none',
+                                        background: showSettings ? '#f1f5f9' : '#f8fafc'
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ fontSize: '16px' }}>⚙️</span>
+                                        <span style={{ fontSize: '15px', fontWeight: '800', color: '#1e293b' }}>우리 학교 맞춤 환경</span>
+                                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#64748b' }}>
+                                            (현재: <b>{schoolType === 'high' ? '고등학교' : '중학교'} · {genderMode === 'coed' ? '남녀공학' : genderMode === 'boys' ? '남학교' : '여학교'} · {idFormat === '5digit' ? '5자리' : idFormat === '4digit' ? '4자리' : '자동감지'}</b>)
+                                        </span>
+                                    </div>
+                                    <span style={{ fontSize: '13.5px', fontWeight: '700', color: '#4f46e5' }}>
+                                        {showSettings ? '▲ 닫기' : '▼ 환경 변경하기'}
+                                    </span>
+                                </div>
+
+                                {showSettings && (
+                                    <div style={{ padding: '16px 20px', borderTop: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                        {/* 1. 학교급 */}
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <span style={{ fontSize: '14px', fontWeight: '700', color: '#475569' }}>1. 학교급</span>
+                                            <div style={{ display: 'flex', gap: '6px' }}>
+                                                {[
+                                                    { id: 'middle', label: '중학교' },
+                                                    { id: 'high', label: '고등학교' }
+                                                ].map(item => (
+                                                    <button
+                                                        key={item.id}
+                                                        type="button"
+                                                        onClick={() => setSchoolType(item.id)}
+                                                        style={{
+                                                            padding: '7px 16px', borderRadius: '8px', fontSize: '13.5px', fontWeight: '700', cursor: 'pointer',
+                                                            border: schoolType === item.id ? '2px solid #3b82f6' : '1px solid #cbd5e1',
+                                                            background: schoolType === item.id ? '#eff6ff' : '#fff',
+                                                            color: schoolType === item.id ? '#1d4ed8' : '#64748b'
+                                                        }}
+                                                    >{item.label}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* 2. 성별 유형 */}
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <span style={{ fontSize: '14px', fontWeight: '700', color: '#475569' }}>2. 성별 구성</span>
+                                            <div style={{ display: 'flex', gap: '6px' }}>
+                                                {[
+                                                    { id: 'coed', label: '남녀공학' },
+                                                    { id: 'boys', label: '남학교' },
+                                                    { id: 'girls', label: '여학교' }
+                                                ].map(item => (
+                                                    <button
+                                                        key={item.id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setGenderMode(item.id);
+                                                            setBalanceGender(item.id === 'coed');
+                                                        }}
+                                                        style={{
+                                                            padding: '7px 14px', borderRadius: '8px', fontSize: '13.5px', fontWeight: '700', cursor: 'pointer',
+                                                            border: genderMode === item.id ? '2px solid #10b981' : '1px solid #cbd5e1',
+                                                            background: genderMode === item.id ? '#ecfdf5' : '#fff',
+                                                            color: genderMode === item.id ? '#047857' : '#64748b'
+                                                        }}
+                                                    >{item.label}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* 3. 학번 체계 */}
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <span style={{ fontSize: '14px', fontWeight: '700', color: '#475569' }}>3. 학번 체계</span>
+                                            <div style={{ display: 'flex', gap: '6px' }}>
+                                                {[
+                                                    { id: 'auto', label: '자동감지' },
+                                                    { id: '4digit', label: '4자리(2101)' },
+                                                    { id: '5digit', label: '5자리(20101)' }
+                                                ].map(item => (
+                                                    <button
+                                                        key={item.id}
+                                                        type="button"
+                                                        onClick={() => setIdFormat(item.id)}
+                                                        style={{
+                                                            padding: '7px 12px', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
+                                                            border: idFormat === item.id ? '2px solid #f59e0b' : '1px solid #cbd5e1',
+                                                            background: idFormat === item.id ? '#fffbeb' : '#fff',
+                                                            color: idFormat === item.id ? '#b45309' : '#64748b'
+                                                        }}
+                                                    >{item.label}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* 4. 대상 학년 */}
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <span style={{ fontSize: '14px', fontWeight: '700', color: '#475569' }}>4. 진급 대상</span>
+                                            <div style={{ display: 'flex', gap: '6px' }}>
+                                                {[
+                                                    { id: '1to2', label: schoolType === 'high' ? '고1→고2' : '1→2학년' },
+                                                    { id: '2to3', label: schoolType === 'high' ? '고2→고3' : '2→3학년' },
+                                                    { id: 'freshman', label: '신입생' }
+                                                ].map(item => (
+                                                    <button
+                                                        key={item.id}
+                                                        type="button"
+                                                        onClick={() => setGradeTransition(item.id)}
+                                                        style={{
+                                                            padding: '7px 12px', borderRadius: '8px', fontSize: '13px', fontWeight: '700', cursor: 'pointer',
+                                                            border: (gradeTransition || '1to2') === item.id ? '2px solid #8b5cf6' : '1px solid #cbd5e1',
+                                                            background: (gradeTransition || '1to2') === item.id ? '#f5f3ff' : '#fff',
+                                                            color: (gradeTransition || '1to2') === item.id ? '#6d28d9' : '#64748b'
+                                                        }}
+                                                    >{item.label}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 양식 다운로드 & 보조 도구 링크 */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13.5px', color: '#64748b', flexWrap: 'wrap', gap: '8px' }}>
+                                <div>
+                                    📥 양식 다운로드: 
+                                    <a href="학생데이터_샘플.xlsx" download style={{ color: '#7c3aed', fontWeight: '700', marginLeft: '6px', textDecoration: 'underline' }}>
+                                        학생명단 샘플.xlsx
+                                    </a>
+                                    <span style={{ margin: '0 6px', color: '#cbd5e1' }}>·</span>
+                                    <a href="분리대상_샘플.xlsx" download style={{ color: '#7c3aed', fontWeight: '700', textDecoration: 'underline' }}>
+                                        분리대상 샘플.xlsx
+                                    </a>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowDiagnostics(true)}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        color: '#94a3b8',
+                                        fontSize: '12px',
+                                        cursor: 'pointer',
+                                        textDecoration: 'underline'
+                                    }}
+                                >
+                                    🧪 108개 환경 검증기 열기
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* 오른쪽: 컴팩트한 폭탄돌리기 위트 카드 & 이어하기 */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            <div style={{
+                                background: 'white',
+                                borderRadius: '20px',
+                                padding: '24px 20px',
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.22)',
+                                textAlign: 'center'
+                            }}>
+                                <img
+                                    src={BOMB_IMAGE}
+                                    alt="폭탄돌리기 게임"
+                                    style={{
+                                        width: '100%',
+                                        maxWidth: '280px',
+                                        borderRadius: '14px',
+                                        boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+                                        border: '4px solid #ff6b6b',
+                                        marginBottom: '14px'
+                                    }}
+                                />
+                                <div style={{
+                                    display: 'inline-block',
+                                    padding: '5px 12px',
+                                    borderRadius: '20px',
+                                    background: '#fee2e2',
+                                    color: '#dc2626',
+                                    fontSize: '13px',
+                                    fontWeight: '800',
+                                    marginBottom: '8px'
+                                }}>
+                                    💣 폭탄 돌리기 그만!
+                                </div>
+                                <div style={{
+                                    fontSize: '16px',
+                                    fontWeight: '800',
+                                    color: '#1e293b',
+                                    marginBottom: '8px',
+                                    lineHeight: '1.4'
+                                }}>
+                                    올해 1년의 평화는<br/>2월 반편성이 결정하죠 🕊️
+                                </div>
+                                <div style={{
+                                    fontSize: '13.5px',
+                                    color: '#475569',
+                                    lineHeight: '1.6',
+                                    fontWeight: '500'
+                                }}>
+                                    어느 한 반만 울상 짓지 않도록,<br/>
+                                    요주의 학생부터 남녀 성비, 성적까지<br/>
+                                    <strong>3월 첫날 모두가 웃을 수 있게</strong> 공평하게 나눕니다.
+                                </div>
+                            </div>
+
+                            {/* 이전 작업 이어하기 (작게 우측 수납) */}
+                            <div
+                                onDragOver={(e) => { e.preventDefault(); setIsDraggingResume(true); }}
+                                onDragLeave={(e) => { e.preventDefault(); setIsDraggingResume(false); }}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    setIsDraggingResume(false);
+                                    processJsonFile(e.dataTransfer.files[0]);
+                                }}
+                                style={{
+                                    padding: '18px',
+                                    background: isDraggingResume ? '#fff3c4' : 'rgba(255,255,255,0.95)',
+                                    borderRadius: '16px',
+                                    textAlign: 'center',
+                                    border: isDraggingResume ? '2px dashed #f57c00' : '2px dashed #ffd591',
+                                    boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                <div style={{ fontSize: '15px', fontWeight: '800', color: '#d97706', marginBottom: '8px' }}>
+                                    💾 이전에 하던 작업이 있나요?
+                                </div>
+                                <label style={{
+                                    display: 'inline-block',
+                                    padding: '10px 20px',
+                                    background: '#f59e0b',
+                                    color: 'white',
+                                    borderRadius: '10px',
+                                    cursor: 'pointer',
+                                    fontWeight: '700',
+                                    fontSize: '13.5px',
+                                    boxShadow: '0 2px 8px rgba(245, 158, 11, 0.35)',
+                                    marginBottom: '6px'
+                                }}>
+                                    📂 작업 파일 불러오기 (JSON)
+                                    <input type="file" accept=".json"
+                                        onChange={(e) => { loadFromFile(e); e.target.value = ''; }}
+                                        style={{ display: 'none' }} />
+                                </label>
+                                <div style={{ fontSize: '12px', color: '#94a3b8' }}>
+                                    또는 JSON 파일을 여기로 끌어다 놓으세요
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* ── 사이드: 이전 작업 이어하기 (작게, 하단) ── */}
-                    <div
-                        onDragOver={(e) => { e.preventDefault(); setIsDraggingResume(true); }}
-                        onDragLeave={(e) => { e.preventDefault(); setIsDraggingResume(false); }}
-                        onDrop={(e) => {
-                            e.preventDefault();
-                            setIsDraggingResume(false);
-                            processJsonFile(e.dataTransfer.files[0]);
-                        }}
-                        style={{
-                            marginTop: '20px', padding: '16px 22px',
-                            background: isDraggingResume ? '#fff3c4' : 'rgba(255,255,255,0.92)',
-                            borderRadius: '14px',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap',
-                            border: isDraggingResume ? '2px dashed #f57c00' : '2px dashed #ffd591',
-                            transition: 'all 0.2s'
-                        }}>
-                        <span style={{ fontSize: '16px', fontWeight: '700', color: '#f57c00' }}>
-                            💾 이어서 하던 작업이 있나요?
-                        </span>
-                        <label style={{
-                            display: 'inline-block', padding: '10px 22px',
-                            background: '#ff9800', color: 'white', borderRadius: '9px', cursor: 'pointer',
-                            fontWeight: '700', fontSize: '14px', boxShadow: '0 2px 8px rgba(255, 152, 0, 0.35)'
-                        }}>
-                            📂 작업 파일 불러오기 (JSON)
-                            <input type="file" accept=".json"
-                                onChange={(e) => { loadFromFile(e); e.target.value = ''; }}
-                                style={{ display: 'none' }} />
-                        </label>
-                        <span style={{ fontSize: '13px', color: isDraggingResume ? '#f57c00' : '#888', fontWeight: '600' }}>📥 또는 JSON 파일을 여기로 끌어다 놓으세요</span>
                     </div>
                 </div>
 
