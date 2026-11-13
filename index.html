@@ -3067,6 +3067,10 @@ function ClassAssignmentApp() {
             ? `\n📚 ${grades.join('·')}학년이 섞여 있어 낮은 학년(${targetGrade}학년)만 사용합니다.`
             : '';
 
+        // TODO(2026-11-14 오이지 점검 메모): 최소 학급 2반 지원 및 구반 자동 감지 복원
+        // 1) Math.max(..., 8) 하한선 때문에 6반 학교도 8반으로 강제 편성됨 -> 2반부터 가능하도록 완화
+        // 2) targetClasses = numClasses || detectedClasses || 2; 형태로 기본값 8 우선권 제거
+        // 3) UI 환경설정 슬라이더도 최소 2반부터 선택 가능하도록 조정 필요
         const detectedClasses = Math.max(...targetRows.map(s => s.반), 8);
         const targetClasses = numClasses || detectedClasses || 8;
         const effectiveIdFormat = (targetClasses >= 10 || chosenIdFormat === '5digit') ? '5digit' : (chosenIdFormat === '4digit' ? '4digit' : (detectedClasses >= 10 ? '5digit' : '4digit'));
@@ -3389,6 +3393,10 @@ ${!data.studentData ? '\n⚠️ 구버전 파일: 학생 데이터 없음 (분�
         const hasGender = doBalance && data.some(s => s.성별 === '남') && data.some(s => s.성별 === '여');
 
         if (hasGender) {
+            // TODO(2026-11-14 오이지 점검 메모): 성별 빈칸 학생 소실 버그 방어 필요
+            // 1) s.성별이 '남'도 '여'도 아닌 학생(빈칸, 누락, 공백 등)은 males/females 어디에도 안 들어가서 소실됨!
+            // 2) unspecified 배열을 두고 성적순으로 분반에 균등 배정(또는 스네이크) 처리 필요
+            // 3) 완료 시점 안전 검증: Object.values(newClasses).flat().length === data.length 일치 확인 필수
             // 남녀 성비 균등 분반: 남학생 순방향 ㄹ자 + 여학생 역방향 ㄹ자 교차
             const males = data.filter(s => s.성별 === '남');
             const females = data.filter(s => s.성별 === '여');

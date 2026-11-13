@@ -89,6 +89,14 @@
 ---
 
 ## 4. 새 세션에서 진행할 다음 작업 (Next Actions)
-1. 사용자 피드백에 따른 추가 기능 또는 세부 스타일링 조정
-2. 배포된 GitHub Pages (`https://getbetterwithu.github.io/class-placement/`) 동작 확인
+
+### 🚨 긴급 로직 버그 수정 및 개선 (2026-11-14 오이지 점검 메모)
+1. **성별 빈칸 학생 소실 버그 방어 (`src/app.jsx:1115`)**:
+   - `executeAssignment()`에서 `s.성별`이 빈칸이거나 누락된 학생이 `males`와 `females` 어디에도 들어가지 않아 배정 결과에서 누락되는 현상 수정
+   - `unspecified` 학생들을 점수순으로 분반에 균등 배정(또는 스네이크)하고, 배치 완료 시 `입력 인원 === 배정 인원` 일치 여부를 상시 검증할 것
+2. **최소 학급 2반 지원 및 구반 자동 감지 복원 (`src/app.jsx:804`)**:
+   - `Math.max(..., 8)` 하한선과 `numClasses` 기본값(8) 우선권 때문에 6반 이하 학교도 8반으로 강제 편성되는 문제 해결
+   - 최소 학급 수를 **2반**부터 가능하도록 하한선을 낮추고, 엑셀 구반 최댓값 자동 감지 복원
+3. 사용자 피드백에 따른 추가 기능 또는 세부 스타일링 조정
+4. 배포된 GitHub Pages (`https://getbetterwithu.github.io/class-placement/`) 동작 확인
 
